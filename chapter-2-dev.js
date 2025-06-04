@@ -92,6 +92,17 @@
     return name.replace(/[&]/g, "and").replace(/[^a-zA-Z0-9-_]/g, "-");
   }
 
+  ///////////////////////////////////////////////////////////// ! Responsive Tick Helper
+  // Returns a subset of tick values when viewport is narrow
+  function getResponsiveTicks(domain) {
+    // Show all ticks on larger screens
+    if (window.innerWidth >= 700) return domain;
+    // For mobile, limit to ~5 ticks
+    const maxTicks = 5;
+    const step = Math.max(1, Math.ceil(domain.length / maxTicks));
+    return domain.filter((d, i) => i % step === 0);
+  }
+
   ///////////////////////////////////////////////////////////// ! Chart Update Function
   // Function to update the chart with new data range
   function updateChart() {
@@ -127,7 +138,7 @@
       .select(".x-axis")
       .transition()
       .duration(500)
-      .call(d3.axisBottom(x))
+      .call(d3.axisBottom(x).tickValues(getResponsiveTicks(x.domain())))
       .selectAll("text")
       .style("text-anchor", currentVisibleCount > 16 ? "end" : "middle")
       .attr("transform", currentVisibleCount > 16 ? "rotate(-45)" : "rotate(0)")
@@ -771,7 +782,7 @@
       .append("g")
       .attr("class", "x-axis")
       .attr("transform", `translate(0,${height})`)
-      .call(d3.axisBottom(x))
+      .call(d3.axisBottom(x).tickValues(getResponsiveTicks(x.domain())))
       .selectAll("line, path")
       .style("opacity", 0.25);
 

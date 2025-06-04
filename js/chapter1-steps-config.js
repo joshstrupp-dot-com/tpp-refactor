@@ -42,8 +42,8 @@ const chapter1StepsConfig = [
         .append("div")
         .style("border", "1px solid black")
         .style("border-radius", "100px")
-        .style("margin-left", "6em")
-        .style("margin-right", "6em")
+        .style("margin-left", window.innerWidth < 700 ? "1em" : "6em")
+        .style("margin-right", window.innerWidth < 700 ? "1em" : "6em")
         .style("display", "flex")
         .style("align-items", "center")
         .style("padding", "10px 20px")
@@ -62,7 +62,7 @@ const chapter1StepsConfig = [
         .attr("class", "scrolling-words-container")
         .style("display", "flex")
         .style("align-items", "center")
-        .style("font-size", "24px")
+        .style("font-size", window.innerWidth < 700 ? "18px" : "24px")
         .style("font-weight", "100")
         .style("font-family", "Andale Mono, monospace");
 
@@ -70,7 +70,7 @@ const chapter1StepsConfig = [
       const scrollingBox = scrollingContainer
         .append("div")
         .attr("class", "scrolling-words-box")
-        .style("height", "3rem")
+        .style("height", window.innerWidth < 700 ? "2.5rem" : "3rem")
         .style("margin", "auto")
         .style("overflow", "hidden");
 
@@ -94,7 +94,7 @@ const chapter1StepsConfig = [
           .style("display", "flex")
           .style("align-items", "center")
           .style("justify-content", "flex-start")
-          .style("height", "3rem")
+          .style("height", window.innerWidth < 700 ? "2.5rem" : "3rem")
           .style("list-style", "none")
           .style("color", word.color)
           .text(word.text);

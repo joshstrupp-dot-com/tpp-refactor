@@ -585,3 +585,63 @@ figure p {
   background-blend-mode: overlay;
   opacity: 0.9;
 } */
+
+@media (max-width: 700px) {
+  /* Prevent horizontal scroll */
+  body {
+    overflow-x: hidden;
+  }
+
+  /* Hero title adjustments */
+  .hero-ladder {
+    gap: 1.5em;
+  }
+  .ladder-step {
+    font-size: 12vw;
+    line-height: 10vw;
+  }
+  /* Reduce indentation on smaller screens */
+  .ladder-step:nth-child(2) {
+    margin-left: 0.5em;
+  }
+  .ladder-step:nth-child(3) {
+    margin-left: 1.5em;
+  }
+  .ladder-step:nth-child(4) {
+    margin-left: 2em;
+  }
+  .ladder-step:nth-child(5) {
+    margin-left: 3em;
+  }
+
+  /* Header & statement step text sizing */
+  .step.header p {
+    font-size: 10vw;
+    padding: 0 2rem;
+  }
+  .step.statement p {
+    font-size: 8vw;
+    padding: 0 2rem;
+  }
+
+  /* Generic step container sizing */
+  .step {
+    width: 90vw;
+    padding: 24px;
+  }
+  .step p {
+    font-size: 16px;
+    line-height: 22px;
+  }
+
+  /* Search-bar animation (chapter 1) */
+  .scrolling-words-container {
+    font-size: 18px !important;
+  }
+  .scrolling-words-box {
+    height: 2.5rem !important;
+  }
+  .scrolling-words-box li {
+    height: 2.5rem !important;
+  }
+}
