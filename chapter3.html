@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Libre+Franklin:wght@200;400&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Libre+Franklin:wght@200;400;800&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="css/styles.css" />
@@ -21,8 +21,9 @@
         position: absolute;
         top: 2rem;
         left: 2rem;
-        background: var(--color-orange);
-        color: white;
+        background: transparent;
+        color: black;
+        border: 2px solid black;
         padding: 1rem 2rem;
         border-radius: 30px;
         cursor: pointer;
@@ -31,7 +32,7 @@
         font-weight: bold;
         letter-spacing: 2px;
         text-transform: uppercase;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         transition: all 0.3s ease;
         z-index: 9999;
       "
@@ -76,11 +77,13 @@
       // Add hover effects for back button
       const backButton = document.getElementById("back-button");
       backButton.addEventListener("mouseover", function () {
-        this.style.background = "var(--color-teal)";
+        this.style.background = "black";
+        this.style.color = "white";
         this.style.transform = "scale(1.05)";
       });
       backButton.addEventListener("mouseout", function () {
-        this.style.background = "var(--color-orange)";
+        this.style.background = "transparent";
+        this.style.color = "black";
         this.style.transform = "scale(1)";
       });
     </script>

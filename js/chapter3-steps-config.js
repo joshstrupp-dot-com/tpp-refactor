@@ -1,7 +1,7 @@
 const chapter3StepsConfig = [
   {
     id: "chapter-3",
-    text: "Context matters. Many authors see fire and fan flames. Others see fire and wonder what caused it.",
+    text: "<span class='eyebrow'>Chapter Three</span>Context matters. Many authors see fire and fan flames. Others see fire and wonder what caused it.",
     fullwidth: true,
     fadeIn: true,
     fadeOut: true,
@@ -190,7 +190,7 @@ const chapter3StepsConfig = [
 
   {
     id: "conclusion",
-    text: "The problem with fixing yourself.",
+    text: "<span class='eyebrow'>Chapter Three</span>The problem with fixing yourself.",
     fullwidth: true,
     customClass: "header",
     render: () => {
@@ -199,13 +199,15 @@ const chapter3StepsConfig = [
 
       // Add a "Back to Beginning" button at the end
       setTimeout(() => {
-        const button = figure
+        const button = d3
+          .select("body")
           .append("div")
-          .style("position", "absolute")
+          .style("position", "fixed")
           .style("bottom", "2rem")
           .style("right", "2rem")
-          .style("background", "var(--color-orange)")
-          .style("color", "white")
+          .style("background", "transparent")
+          .style("color", "black")
+          .style("border", "2px solid black")
           .style("padding", "1rem 2rem")
           .style("border-radius", "30px")
           .style("cursor", "pointer")
@@ -214,9 +216,10 @@ const chapter3StepsConfig = [
           .style("font-weight", "bold")
           .style("letter-spacing", "2px")
           .style("text-transform", "uppercase")
-          .style("box-shadow", "0 4px 15px rgba(0,0,0,0.2)")
+          .style("box-shadow", "0 4px 15px rgba(0,0,0,0.1)")
           .style("transition", "all 0.3s ease")
-          .style("z-index", "9999")
+          .style("z-index", "99999")
+          .style("pointer-events", "auto")
           .style("opacity", "0")
           .text("← Back to Beginning")
           .on("click", () => {
@@ -224,12 +227,14 @@ const chapter3StepsConfig = [
           })
           .on("mouseover", function () {
             d3.select(this)
-              .style("background", "var(--color-teal)")
+              .style("background", "black")
+              .style("color", "white")
               .style("transform", "scale(1.05)");
           })
           .on("mouseout", function () {
             d3.select(this)
-              .style("background", "var(--color-orange)")
+              .style("background", "transparent")
+              .style("color", "black")
               .style("transform", "scale(1)");
           });
 

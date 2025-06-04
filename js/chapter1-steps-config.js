@@ -1,8 +1,8 @@
 const chapter1StepsConfig = [
   {
     id: "chapter-1",
-    text: `<span style="opacity: 0.4">Life is hard. Advice can help.</span> And there <video src="assets/videos/yt1.mp4" style="display: inline-block; width: 125px; vertical-align: middle; margin: 0 5px;" autoplay muted loop playsinline></video>  is no <video src="assets/videos/yt2.mp4" style="display: inline-block; width: 125px; vertical-align: middle; margin: 0 5px;" autoplay muted loop playsinline></video> shortage 
-     of <video src="assets/videos/yt3.mp4" style="display: inline-block; width: 125px; vertical-align: middle; margin: 0 5px;" autoplay muted loop playsinline></video> advice.`,
+    text: `<span class="eyebrow">Chapter One</span><span style="opacity: 0.4">Life is hard. Advice can help.</span> And there <video src="assets/videos/yt1.mp4" style="display: inline-block; width: 150px; vertical-align: middle; margin: 0 5px;" autoplay muted loop playsinline></video>  is no <video src="assets/videos/yt2.mp4" style="display: inline-block; width: 150px; vertical-align: middle; margin: 0 5px;" autoplay muted loop playsinline></video> shortage 
+     of <video src="assets/videos/yt3.mp4" style="display: inline-block; width: 150px; vertical-align: middle; margin: 0 5px;" autoplay muted loop playsinline></video> advice.`,
     fullwidth: true,
     customClass: "header",
     render: () => {
@@ -400,22 +400,13 @@ const chapter1StepsConfig = [
             detail: { step: "intro-2" },
           })
         );
-      }, 4000);
-
-      // After another 3 seconds, transition to external-internal-sort (world vs you piles)
-      setTimeout(() => {
-        document.dispatchEvent(
-          new CustomEvent("visualizationUpdate", {
-            detail: { step: "external-internal-sort" },
-          })
-        );
-      }, 8500);
+      }, 5500);
     },
   },
 
   {
     id: "chapter-1-end",
-    text: `<span style="opacity: 0.4">Placeholder ending text for Chapter 1.</span> Coming soon.`,
+    text: `<span class="eyebrow">Chapter One</span><span style="opacity: 0.4">Placeholder ending text for Chapter 1.</span> Coming soon.`,
     fullwidth: true,
     customClass: "header",
     render: () => {
@@ -441,8 +432,9 @@ const chapter1StepsConfig = [
         const button = buttonContainer
           .append("div")
           .attr("id", "chapter-2-button")
-          .style("background", "var(--color-teal)")
-          .style("color", "white")
+          .style("background", "transparent")
+          .style("color", "black")
+          .style("border", "2px solid black")
           .style("padding", "1rem 2rem")
           .style("border-radius", "30px")
           .style("cursor", "pointer")
@@ -451,7 +443,7 @@ const chapter1StepsConfig = [
           .style("font-weight", "bold")
           .style("letter-spacing", "2px")
           .style("text-transform", "uppercase")
-          .style("box-shadow", "0 4px 15px rgba(0,0,0,0.2)")
+          .style("box-shadow", "0 4px 15px rgba(0,0,0,0.1)")
           .style("transition", "all 0.3s ease")
           .style("opacity", "0")
           .style("pointer-events", "all") // Allow clicks on button
@@ -461,12 +453,14 @@ const chapter1StepsConfig = [
           })
           .on("mouseover", function () {
             d3.select(this)
-              .style("background", "var(--color-orange)")
+              .style("background", "black")
+              .style("color", "white")
               .style("transform", "scale(1.05)");
           })
           .on("mouseout", function () {
             d3.select(this)
-              .style("background", "var(--color-teal)")
+              .style("background", "transparent")
+              .style("color", "black")
               .style("transform", "scale(1)");
           });
 

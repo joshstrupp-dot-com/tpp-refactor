@@ -1,7 +1,7 @@
 const chapter2StepsConfig = [
   {
     id: "chapter-2",
-    text: `The very first self-help book is, surprise, called <em>"Self Help"</em>.`,
+    text: `<span class="eyebrow">Chapter Two</span>The very first self-help book is, surprise, called <em>"Self Help"</em>.`,
     fullwidth: true,
     customClass: "header",
     render: () => {
@@ -88,7 +88,7 @@ const chapter2StepsConfig = [
 
   {
     id: "chapter-2-end",
-    text: `<span style="opacity: 0.4">Placeholder ending text for Chapter 2.</span> Coming soon.`,
+    text: `<span class="eyebrow">Chapter Two</span><span style="opacity: 0.4">Placeholder ending text for Chapter 2.</span> Coming soon.`,
     fullwidth: true,
     customClass: "header",
     render: () => {
@@ -114,8 +114,9 @@ const chapter2StepsConfig = [
         const button = buttonContainer
           .append("div")
           .attr("id", "chapter-3-button")
-          .style("background", "var(--color-teal)")
-          .style("color", "white")
+          .style("background", "transparent")
+          .style("color", "black")
+          .style("border", "2px solid black")
           .style("padding", "1rem 2rem")
           .style("border-radius", "30px")
           .style("cursor", "pointer")
@@ -124,7 +125,7 @@ const chapter2StepsConfig = [
           .style("font-weight", "bold")
           .style("letter-spacing", "2px")
           .style("text-transform", "uppercase")
-          .style("box-shadow", "0 4px 15px rgba(0,0,0,0.2)")
+          .style("box-shadow", "0 4px 15px rgba(0,0,0,0.1)")
           .style("transition", "all 0.3s ease")
           .style("opacity", "0")
           .style("pointer-events", "all") // Allow clicks on button
@@ -134,12 +135,14 @@ const chapter2StepsConfig = [
           })
           .on("mouseover", function () {
             d3.select(this)
-              .style("background", "var(--color-orange)")
+              .style("background", "black")
+              .style("color", "white")
               .style("transform", "scale(1.05)");
           })
           .on("mouseout", function () {
             d3.select(this)
-              .style("background", "var(--color-teal)")
+              .style("background", "transparent")
+              .style("color", "black")
               .style("transform", "scale(1)");
           });
 
