@@ -378,7 +378,7 @@
             text-transform: uppercase;
             opacity: 0.5;
           ">AUTHOR:</span>
-          <strong>${d.author_clean}</strong><br/>
+          <strong style="font-size: 24px;">${d.author_clean}</strong><br/>
            <span class="andale">Books: ${d.author_num_books}</span><br/>
            <span class="andale">Rating: ${d.avg_star_rating.toFixed(
              2

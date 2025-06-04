@@ -62,7 +62,7 @@ const chapter1StepsConfig = [
         .attr("class", "scrolling-words-container")
         .style("display", "flex")
         .style("align-items", "center")
-        .style("font-size", "1.5rem")
+        .style("font-size", "24px")
         .style("font-weight", "100")
         .style("font-family", "Andale Mono, monospace");
 

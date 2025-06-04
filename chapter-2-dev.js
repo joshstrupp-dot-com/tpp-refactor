@@ -623,7 +623,7 @@
     const bookCountLabel = yearLabelGroup
       .append("text")
       .attr("class", "annotation")
-      .style("font-size", "12px")
+      .style("font-size", "14px")
       .attr("text-anchor", "middle")
       .attr("dy", "1.5em") // Position below the year label
       .style("opacity", 0);
@@ -879,7 +879,7 @@
       .attr("x", 10)
       .attr("y", 20)
       .attr("class", "annotation")
-      .attr("font-size", "12px")
+      .attr("font-size", "14px")
       .text("Problem Origin:");
 
     // Add origins to legend in a horizontal layout
@@ -913,7 +913,7 @@
           .attr("x", 270) // Moved left by reducing from 290 to 270
           .attr("y", 20)
           .style("font-family", "Andale Mono")
-          .style("font-size", "12px")
+          .style("font-size", "14px")
           .style("opacity", 0.5)
           .style("text-anchor", "middle")
           .text("vs.");

@@ -209,7 +209,7 @@
   display: block;
 
   font-family: "Big Caslon";
-  font-size: 18px;
+  font-size: 14px;
   font-style: normal;
   font-weight: 500;
   line-height: 22px;
@@ -226,7 +226,7 @@
 .annotation {
   color: #000;
   font-family: "Andale Mono";
-  font-size: 12px;
+  font-size: 14px;
   font-style: normal;
   font-weight: 400;
   line-height: 27px; /* 168.75% */
@@ -255,12 +255,12 @@ body {
 }
 
 .intro__hed {
-  font-size: 3rem;
+  font-size: 50px;
   margin-bottom: 1rem;
 }
 
 .intro__dek {
-  font-size: 1.5rem;
+  font-size: 24px;
   margin-bottom: 2rem;
 }
 
@@ -314,7 +314,7 @@ figure p {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 8rem;
+  font-size: 80px;
   font-weight: 900;
   color: #fff;
 }
@@ -423,7 +423,7 @@ figure p {
   color: #000;
   text-align: center;
   font-family: "Libre Caslon Display", serif;
-  font-size: 32px;
+  font-size: 24px;
   font-style: normal;
   font-weight: 400;
   line-height: 24px; /* 75% */
@@ -560,7 +560,7 @@ figure p {
 
 .year-label-group text:first-child {
   font-family: "Big Caslon";
-  font-size: 22px;
+  font-size: 24px;
   font-style: normal;
   font-weight: 500;
   line-height: 22px;
@@ -569,7 +569,7 @@ figure p {
 
 .year-label-group text:last-child {
   font-family: "Andale Mono", "Menlo", "Monaco", "Consolas", monospace;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 400;
   text-transform: uppercase;
   letter-spacing: 0.05em;

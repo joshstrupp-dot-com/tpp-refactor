@@ -1,6 +1,6 @@
 (function () {
   ///////////////////////////////////////////////////////////// ! Setup and Configuration
-  // Adjust chapter-3-3d div to fill the viewport
+  // Adjust chapter-3-3d div to fill the viewport but leave scroll margins
   const chapter3_3dDiv = document.getElementById("chapter-3-3d");
   chapter3_3dDiv.style.width = "100vw";
   chapter3_3dDiv.style.height = "100vh";
@@ -8,6 +8,78 @@
   chapter3_3dDiv.style.padding = "0";
   chapter3_3dDiv.style.border = "none";
   chapter3_3dDiv.style.position = "relative";
+  chapter3_3dDiv.style.display = "flex";
+  chapter3_3dDiv.style.alignItems = "center";
+  chapter3_3dDiv.style.justifyContent = "center";
+
+  // Create the actual plot container with margins for scroll zones
+  let plotContainer = document.getElementById("plot-container-3d");
+  if (!plotContainer) {
+    plotContainer = document.createElement("div");
+    plotContainer.id = "plot-container-3d";
+    plotContainer.style.width = "80%"; // Leave 10% margin on each side for scrolling
+    plotContainer.style.height = "85%"; // Leave margins top/bottom too
+    plotContainer.style.position = "relative";
+    plotContainer.style.background = "#f2efe9";
+    plotContainer.style.borderRadius = "12px";
+    plotContainer.style.boxShadow = "0 4px 20px rgba(0,0,0,0.1)";
+    chapter3_3dDiv.appendChild(plotContainer);
+  }
+
+  // Add scroll hint overlays
+  function addScrollHints() {
+    // Remove existing hints
+    document.querySelectorAll(".scroll-hint").forEach((el) => el.remove());
+
+    // Left scroll hint
+    const leftHint = document.createElement("div");
+    leftHint.className = "scroll-hint";
+    leftHint.innerHTML = "↕<br>Scroll<br>here";
+    leftHint.style.position = "absolute";
+    leftHint.style.left = "2rem";
+    leftHint.style.top = "50%";
+    leftHint.style.transform = "translateY(-50%)";
+    leftHint.style.color = "rgba(0,0,0,0.6)";
+    leftHint.style.fontSize = "14px";
+    leftHint.style.fontFamily = "Andale Mono, monospace";
+    leftHint.style.textAlign = "center";
+    leftHint.style.lineHeight = "1.2";
+    leftHint.style.pointerEvents = "none";
+    leftHint.style.zIndex = "1000";
+    leftHint.style.animation = "fadeInOut 3s ease-in-out infinite";
+    chapter3_3dDiv.appendChild(leftHint);
+
+    // Right scroll hint
+    const rightHint = document.createElement("div");
+    rightHint.className = "scroll-hint";
+    rightHint.innerHTML = "↕<br>Scroll<br>here";
+    rightHint.style.position = "absolute";
+    rightHint.style.right = "2rem";
+    rightHint.style.top = "50%";
+    rightHint.style.transform = "translateY(-50%)";
+    rightHint.style.color = "rgba(0,0,0,0.6)";
+    rightHint.style.fontSize = "14px";
+    rightHint.style.fontFamily = "Andale Mono, monospace";
+    rightHint.style.textAlign = "center";
+    rightHint.style.lineHeight = "1.2";
+    rightHint.style.pointerEvents = "none";
+    rightHint.style.zIndex = "1000";
+    rightHint.style.animation = "fadeInOut 3s ease-in-out infinite";
+    chapter3_3dDiv.appendChild(rightHint);
+
+    // Add CSS animation if not already added
+    if (!document.getElementById("scroll-hint-styles")) {
+      const style = document.createElement("style");
+      style.id = "scroll-hint-styles";
+      style.textContent = `
+        @keyframes fadeInOut {
+          0%, 100% { opacity: 0.3; }
+          50% { opacity: 0.8; }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  }
 
   // Store all author data
   let allAuthorData = [];
@@ -43,6 +115,35 @@
   // Function to display author data in 3D
   function displayAuthorData3D(data, stepId) {
     if (data && data.length > 0) {
+      // Ensure the main container and plot container exist
+      const chapter3_3dDiv = document.getElementById("chapter-3-3d");
+      if (!chapter3_3dDiv) return;
+
+      // Set up the main container styling
+      chapter3_3dDiv.style.width = "100vw";
+      chapter3_3dDiv.style.height = "100vh";
+      chapter3_3dDiv.style.margin = "0";
+      chapter3_3dDiv.style.padding = "0";
+      chapter3_3dDiv.style.border = "none";
+      chapter3_3dDiv.style.position = "relative";
+      chapter3_3dDiv.style.display = "flex";
+      chapter3_3dDiv.style.alignItems = "center";
+      chapter3_3dDiv.style.justifyContent = "center";
+
+      // Create or get the plot container
+      let plotContainer = document.getElementById("plot-container-3d");
+      if (!plotContainer) {
+        plotContainer = document.createElement("div");
+        plotContainer.id = "plot-container-3d";
+        plotContainer.style.width = "80%";
+        plotContainer.style.height = "85%";
+        plotContainer.style.position = "relative";
+        plotContainer.style.background = "#f2efe9";
+        plotContainer.style.borderRadius = "12px";
+        plotContainer.style.boxShadow = "0 4px 20px rgba(0,0,0,0.1)";
+        chapter3_3dDiv.appendChild(plotContainer);
+      }
+
       ///////////////////////////////////////////////////////////// ! Data Processing
       // Parse numeric data
       data.forEach((d) => {
@@ -99,8 +200,8 @@
 
       const layout = {
         autosize: true,
-        height: chapter3_3dDiv.clientHeight,
-        width: chapter3_3dDiv.clientWidth,
+        height: plotContainer.clientHeight,
+        width: plotContainer.clientWidth,
         showlegend: false,
         paper_bgcolor: "#f2efe9",
         plot_bgcolor: "#f2efe9",
@@ -188,18 +289,18 @@
       ///////////////////////////////////////////////////////////// ! Responsive Behavior
       // Add window resize event handler for responsive behavior
       window.addEventListener("resize", function () {
-        Plotly.relayout("chapter-3-3d", {
-          width: chapter3_3dDiv.clientWidth,
-          height: chapter3_3dDiv.clientHeight,
+        Plotly.relayout("plot-container-3d", {
+          width: plotContainer.clientWidth,
+          height: plotContainer.clientHeight,
         });
       });
 
-      // Reference the graph div
-      const graphDiv = document.getElementById("chapter-3-3d");
+      // Reference the plot container
+      const graphDiv = document.getElementById("plot-container-3d");
 
       // If already plotted, only update the marker styling
       if (graphDiv && graphDiv._fullLayout && graphDiv._fullLayout.scene) {
-        Plotly.restyle("chapter-3-3d", {
+        Plotly.restyle("plot-container-3d", {
           "marker.size": [data.map((d) => (d.highlighted ? 25 : 8))],
           "marker.color": [
             data.map((d) => {
@@ -218,14 +319,20 @@
           ],
           "marker.line.width": [data.map((d) => (d.highlighted ? 2 : 1))],
         });
+
+        // Ensure scroll hints are still there
+        setTimeout(addScrollHints, 100);
       } else {
-        // Initial plot creation
-        Plotly.newPlot("chapter-3-3d", plotData, layout);
+        // Initial plot creation or recreation after container was removed
+        Plotly.newPlot("plot-container-3d", plotData, layout);
+
+        // Add scroll hints after plot is created
+        setTimeout(addScrollHints, 500);
       }
 
       // Add event listener to log camera position when the view changes
       document
-        .getElementById("chapter-3-3d")
+        .getElementById("plot-container-3d")
         .on("plotly_relayout", function (eventData) {
           // Check if the event contains camera information
           if (eventData && eventData["scene.camera"]) {
@@ -244,7 +351,7 @@
 
   // Function to get current camera position
   window.getCameraPosition = function () {
-    const graphDiv = document.getElementById("chapter-3-3d");
+    const graphDiv = document.getElementById("plot-container-3d");
     if (graphDiv && graphDiv._fullLayout && graphDiv._fullLayout.scene) {
       const camera = graphDiv._fullLayout.scene._scene.camera;
       return {
