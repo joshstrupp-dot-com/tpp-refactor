@@ -1,8 +1,14 @@
 const chapter1StepsConfig = [
   {
     id: "chapter-1",
-    text: `<span class="eyebrow">Chapter One</span><span style="opacity: 0.4">Life is hard. Advice can help.</span> And there <video src="assets/videos/yt1.mp4" style="display: inline-block; width: 150px; vertical-align: middle; margin: 0 5px;" autoplay muted loop playsinline></video>  is no <video src="assets/videos/yt2.mp4" style="display: inline-block; width: 150px; vertical-align: middle; margin: 0 5px;" autoplay muted loop playsinline></video> shortage 
-     of <video src="assets/videos/yt3.mp4" style="display: inline-block; width: 150px; vertical-align: middle; margin: 0 5px;" autoplay muted loop playsinline></video> advice.`,
+    text: `<span class="eyebrow">Chapter One</span><span style="opacity: 0.4">Life is hard. Advice can help.</span> And there <video src="assets/videos/yt1.mp4" style="display: inline-block; width: ${
+      window.innerWidth <= 768 ? "80px" : "150px"
+    }; vertical-align: middle; margin: 0 5px;" autoplay muted loop playsinline></video>  is no <video src="assets/videos/yt2.mp4" style="display: inline-block; width: ${
+      window.innerWidth <= 768 ? "80px" : "150px"
+    }; vertical-align: middle; margin: 0 5px;" autoplay muted loop playsinline></video> shortage 
+     of <video src="assets/videos/yt3.mp4" style="display: inline-block; width: ${
+       window.innerWidth <= 768 ? "80px" : "150px"
+     }; vertical-align: middle; margin: 0 5px;" autoplay muted loop playsinline></video> advice.`,
     fullwidth: true,
     customClass: "header",
     render: () => {
@@ -425,7 +431,8 @@ const chapter1StepsConfig = [
           .attr("id", "chapter-2-button-container")
           .style("position", "fixed")
           .style("bottom", "2rem")
-          .style("right", "2rem")
+          .style("left", "50%")
+          .style("transform", "translateX(-50%)")
           .style("z-index", "10000") // Very high z-index to appear on top
           .style("pointer-events", "none"); // Allow clicks to pass through container
 

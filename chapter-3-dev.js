@@ -76,8 +76,15 @@
   const fullWidth = chapter3Div.clientWidth;
   const fullHeight = chapter3Div.clientHeight;
 
-  // Set up dimensions and margins for the chart
-  const margin = { top: 100, right: 100, bottom: 100, left: 100 };
+  // Set up dimensions and margins for the chart - smaller margins on mobile
+  const isMobileDevice =
+    window.innerWidth <= 768 ||
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    );
+  const margin = isMobileDevice
+    ? { top: 60, right: 30, bottom: 60, left: 80 } // Tighter margins for mobile
+    : { top: 100, right: 100, bottom: 100, left: 100 }; // Original margins for desktop
   const width = fullWidth - margin.left - margin.right;
   const height = fullHeight - margin.top - margin.bottom;
 
@@ -140,11 +147,18 @@
   function displayAuthorData(data, stepId) {
     if (!data || data.length === 0) return;
 
+    // Detect mobile for layout decisions
+    const isMobile =
+      window.innerWidth <= 768 ||
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      );
+
     // Clean up old tooltips
     d3.selectAll(".tooltip").remove();
 
-    // Instead of clearing everything, only clear axes and labels
-    svg.selectAll(".x-axis, .y-axis, .annotation").remove();
+    // Instead of clearing everything, only clear axes, labels, and legend
+    svg.selectAll(".x-axis, .y-axis, .annotation, .legend").remove();
     svg.selectAll(".regular-point, .featured-point").remove(); // Remove old points for force layout
 
     ///////////////////////////////////////////////////////////// ! Data Processing
@@ -161,92 +175,126 @@
     const sizeScale = d3
       .scaleSqrt()
       .domain([minBooks, maxBooks])
-      .range([8, 40]);
+      .range(isMobile ? [6, 30] : [8, 40]); // Smaller circles on mobile
 
-    const xScale = d3
-      .scaleLinear()
-      .domain([3.2, d3.max(data, (d) => d.avg_star_rating)])
-      .nice()
-      .range([0, width]);
-    const yCenter = height / 2;
+    // Different scales for mobile vs desktop
+    let xScale, yScale, xCenter, yCenter;
+
+    if (isMobile) {
+      // Mobile: Vertical layout - star rating on Y axis
+      yScale = d3
+        .scaleLinear()
+        .domain([3.5, 4.4])
+        .nice()
+        .range([height - 50, 50]); // Inverted for Y axis (top to bottom)
+      xCenter = width / 2;
+    } else {
+      // Desktop: Horizontal layout - star rating on X axis
+      xScale = d3.scaleLinear().domain([3.5, 4.4]).nice().range([0, width]);
+      yCenter = height / 2;
+    }
 
     ///////////////////////////////////////////////////////////// ! Legend Creation
-    // Create a legend group in the top left corner
-    const legendGroup = svg
-      .append("g")
-      .attr("class", "legend")
-      .attr("transform", "translate(50, 50)");
+    // Only show legend on desktop
+    if (!isMobile) {
+      // Create a legend group in the top left corner
+      const legendGroup = svg
+        .append("g")
+        .attr("class", "legend")
+        .attr("transform", "translate(50, 50)");
 
-    // Create nested circles using actual data ranges
-    const midBooks = Math.round((minBooks + maxBooks) / 2);
-    const legendSizes = [
-      { size: sizeScale(maxBooks), label: `${maxBooks} books` },
-      { size: sizeScale(midBooks), label: `${midBooks} books` },
-      { size: sizeScale(minBooks), label: `${minBooks} books` },
-    ].sort((a, b) => b.size - a.size); // Sort by size descending
+      // Create nested circles using actual data ranges
+      const midBooks = Math.round((minBooks + maxBooks) / 2);
+      const legendSizes = [
+        { size: sizeScale(maxBooks), label: `${maxBooks} books` },
+        { size: sizeScale(midBooks), label: `${midBooks} books` },
+        { size: sizeScale(minBooks), label: `${minBooks} books` },
+      ].sort((a, b) => b.size - a.size); // Sort by size descending
 
-    // Add circles
-    legendGroup
-      .selectAll(".legend-circle")
-      .data(legendSizes)
-      .enter()
-      .append("circle")
-      .attr("class", "legend-circle")
-      .attr("cx", 0)
-      .attr("cy", 0)
-      .attr("r", (d) => d.size)
-      .style("fill", "var(--color-base-darker)")
-      .style("opacity", 0.9)
-      .style("stroke", "black")
-      .style("stroke-width", 1);
+      // Add circles
+      legendGroup
+        .selectAll(".legend-circle")
+        .data(legendSizes)
+        .enter()
+        .append("circle")
+        .attr("class", "legend-circle")
+        .attr("cx", 0)
+        .attr("cy", 0)
+        .attr("r", (d) => d.size)
+        .style("fill", "var(--color-base-darker)")
+        .style("opacity", 0.9)
+        .style("stroke", "black")
+        .style("stroke-width", 1);
 
-    // Add lines from circle edge to label
-    const labelGroup = legendGroup
-      .selectAll(".label-group")
-      .data(legendSizes)
-      .enter()
-      .append("g")
-      .attr("class", "label-group");
+      // Add lines from circle edge to label
+      const labelGroup = legendGroup
+        .selectAll(".label-group")
+        .data(legendSizes)
+        .enter()
+        .append("g")
+        .attr("class", "label-group");
 
-    labelGroup
-      .append("line")
-      .attr("x1", (d) => d.size)
-      .attr("y1", 0)
-      .attr("x2", (d) => d.size + (d.size === sizeScale(minBooks) ? 30 : 20))
-      .attr("y2", 0)
-      .style("stroke", "black")
-      .style("stroke-width", 1);
+      labelGroup
+        .append("line")
+        .attr("x1", (d) => d.size)
+        .attr("y1", 0)
+        .attr("x2", (d) => d.size + (d.size === sizeScale(minBooks) ? 30 : 20))
+        .attr("y2", 0)
+        .style("stroke", "black")
+        .style("stroke-width", 1);
 
-    // Add text labels
-    labelGroup
-      .append("text")
-      .attr("x", (d) => d.size + (d.size === sizeScale(minBooks) ? 35 : 25))
-      .attr("y", 0)
-      .attr("dy", "0.32em")
-      .style("font-size", "12px")
-      .text((d) => d.label);
+      // Add text labels
+      labelGroup
+        .append("text")
+        .attr("x", (d) => d.size + (d.size === sizeScale(minBooks) ? 35 : 25))
+        .attr("y", 0)
+        .attr("dy", "0.32em")
+        .style("font-size", "12px")
+        .text((d) => d.label);
 
-    // Position label groups at different angles
-    labelGroup.attr("transform", (d, i) => {
-      const angle = -60 + i * 60; // Spread labels on right side, more compact angle range
-      return `rotate(${angle})`;
-    });
+      // Position label groups at different angles
+      labelGroup.attr("transform", (d, i) => {
+        const angle = -60 + i * 60; // Spread labels on right side, more compact angle range
+        return `rotate(${angle})`;
+      });
+    }
 
     ///////////////////////////////////////////////////////////// ! Axes Creation
-    svg
-      .append("g")
-      .attr("class", "x-axis")
-      .attr("transform", `translate(0,${yCenter + 60})`)
-      .call(d3.axisBottom(xScale))
-      .selectAll("text")
-      .attr("class", "annotation");
-    svg
-      .append("text")
-      .attr("class", "annotation")
-      .attr("x", 0)
-      .attr("y", yCenter + 100)
-      .style("text-anchor", "start")
-      .text("Average Star Rating");
+    if (isMobile) {
+      // Mobile: Y-axis for star rating
+      svg
+        .append("g")
+        .attr("class", "y-axis")
+        .attr("transform", `translate(${xCenter - 40}, 0)`)
+        .call(d3.axisLeft(yScale))
+        .selectAll("text")
+        .attr("class", "annotation");
+      svg
+        .append("text")
+        .attr("class", "annotation")
+        .attr(
+          "transform",
+          `translate(${xCenter - 95}, ${height / 2}) rotate(-90)`
+        )
+        .style("text-anchor", "middle")
+        .text("Average Star Rating");
+    } else {
+      // Desktop: X-axis for star rating
+      svg
+        .append("g")
+        .attr("class", "x-axis")
+        .attr("transform", `translate(0,${yCenter + 60})`)
+        .call(d3.axisBottom(xScale))
+        .selectAll("text")
+        .attr("class", "annotation");
+      svg
+        .append("text")
+        .attr("class", "annotation")
+        .attr("x", 0)
+        .attr("y", yCenter + 100)
+        .style("text-anchor", "start")
+        .text("Average Star Rating");
+    }
 
     ///////////////////////////////////////////////////////////// ! Tooltip Creation
     tooltip = d3.select("body").append("div").attr("class", "tooltip");
@@ -405,16 +453,30 @@
       tooltip.style("opacity", 0);
     });
 
-    // D3 force simulation
-    const simulation = d3
-      .forceSimulation(nodes)
-      .force("x", d3.forceX((d) => xScale(d.avg_star_rating)).strength(1))
-      .force("y", d3.forceY(yCenter).strength(0.08))
-      .force(
-        "collide",
-        d3.forceCollide((d) => sizeScale(d.author_num_books) + 2)
-      )
-      .stop();
+    // D3 force simulation - different for mobile vs desktop
+    const simulation = d3.forceSimulation(nodes);
+
+    if (isMobile) {
+      // Mobile: Vertical layout with Y positioning for star rating
+      simulation
+        .force("x", d3.forceX(xCenter).strength(0.08))
+        .force("y", d3.forceY((d) => yScale(d.avg_star_rating)).strength(1))
+        .force(
+          "collide",
+          d3.forceCollide((d) => sizeScale(d.author_num_books) + 1)
+        );
+    } else {
+      // Desktop: Horizontal layout with X positioning for star rating
+      simulation
+        .force("x", d3.forceX((d) => xScale(d.avg_star_rating)).strength(1))
+        .force("y", d3.forceY(yCenter).strength(0.08))
+        .force(
+          "collide",
+          d3.forceCollide((d) => sizeScale(d.author_num_books) + 2)
+        );
+    }
+
+    simulation.stop();
 
     // Run the simulation for a fixed number of ticks for static layout
     for (let i = 0; i < 300; ++i) simulation.tick();
@@ -441,12 +503,38 @@
     // Load author data once
     d3.csv("data/sh_0415_author/author.csv", d3.autoType)
       .then((data) => {
-        // Filter and store
-        allAuthorData = data.filter(
-          (author) =>
-            featuredAuthors.hasOwnProperty(author.author_clean) ||
-            (author.author_num_books > 20 && author.avg_num_ratings >= 5000)
-        );
+        // Detect mobile device
+        const isMobile =
+          window.innerWidth <= 768 ||
+          /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+            navigator.userAgent
+          );
+
+        // Filter and store - less aggressive filtering for mobile
+        if (isMobile) {
+          // Mobile: Keep all featured authors + more non-featured authors since we're going vertical
+          const featuredData = data.filter((author) =>
+            featuredAuthors.hasOwnProperty(author.author_clean)
+          );
+          const nonFeaturedData = data
+            .filter(
+              (author) =>
+                !featuredAuthors.hasOwnProperty(author.author_clean) &&
+                author.author_num_books > 15 &&
+                author.avg_num_ratings >= 3000
+            )
+            .sort((a, b) => b.avg_num_ratings - a.avg_num_ratings)
+            .slice(0, 40); // More authors for vertical layout
+
+          allAuthorData = [...featuredData, ...nonFeaturedData];
+        } else {
+          // Desktop: Use original filtering
+          allAuthorData = data.filter(
+            (author) =>
+              featuredAuthors.hasOwnProperty(author.author_clean) ||
+              (author.author_num_books > 20 && author.avg_num_ratings >= 5000)
+          );
+        }
 
         // Manual overrides
         allAuthorData.forEach((author) => {
@@ -495,5 +583,76 @@
           return `translate(${d.x},${d.y}) scale(1)`;
         });
     }
+  });
+
+  // Add resize event listener to re-filter data for mobile/desktop changes
+  let resizeTimeout;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      // Update dimensions and margins based on new screen size
+      const newIsMobileDevice =
+        window.innerWidth <= 768 ||
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+          navigator.userAgent
+        );
+      const newMargin = newIsMobileDevice
+        ? { top: 60, right: 30, bottom: 60, left: 80 }
+        : { top: 100, right: 100, bottom: 100, left: 100 };
+      const newWidth =
+        chapter3Div.clientWidth - newMargin.left - newMargin.right;
+      const newHeight =
+        chapter3Div.clientHeight - newMargin.top - newMargin.bottom;
+
+      // Update SVG transform
+      svg.attr("transform", `translate(${newMargin.left},${newMargin.top})`);
+
+      // Re-load and filter data based on new screen size
+      if (allAuthorData) {
+        d3.csv("data/sh_0415_author/author.csv", d3.autoType).then((data) => {
+          const isMobile =
+            window.innerWidth <= 768 ||
+            /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+              navigator.userAgent
+            );
+
+          if (isMobile) {
+            const featuredData = data.filter((author) =>
+              featuredAuthors.hasOwnProperty(author.author_clean)
+            );
+            const nonFeaturedData = data
+              .filter(
+                (author) =>
+                  !featuredAuthors.hasOwnProperty(author.author_clean) &&
+                  author.author_num_books > 15 &&
+                  author.avg_num_ratings >= 3000
+              )
+              .sort((a, b) => b.avg_num_ratings - a.avg_num_ratings)
+              .slice(0, 40);
+
+            allAuthorData = [...featuredData, ...nonFeaturedData];
+          } else {
+            allAuthorData = data.filter(
+              (author) =>
+                featuredAuthors.hasOwnProperty(author.author_clean) ||
+                (author.author_num_books > 20 && author.avg_num_ratings >= 5000)
+            );
+          }
+
+          // Apply manual overrides
+          allAuthorData.forEach((author) => {
+            if (author.author_clean === "Matthew McConaughey") {
+              author.author_num_books = 15;
+            }
+            if (author.author_clean === "Michelle Obama") {
+              author.author_num_books = 60;
+            }
+          });
+
+          // Re-render with current step
+          displayAuthorData(filterDataForStep(currentStepId), currentStepId);
+        });
+      }
+    }, 300); // Debounce resize events
   });
 })();

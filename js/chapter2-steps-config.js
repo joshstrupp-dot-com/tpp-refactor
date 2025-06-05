@@ -107,7 +107,8 @@ const chapter2StepsConfig = [
           .attr("id", "chapter-3-button-container")
           .style("position", "fixed")
           .style("bottom", "2rem")
-          .style("right", "2rem")
+          .style("left", "50%")
+          .style("transform", "translateX(-50%)")
           .style("z-index", "10000") // Very high z-index to appear on top
           .style("pointer-events", "none"); // Allow clicks to pass through container
 

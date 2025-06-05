@@ -15,8 +15,13 @@
   const fullWidth = chapter2Div.clientWidth;
   const fullHeight = chapter2Div.clientHeight;
 
-  // Set up margins for the chart
-  const margin = { top: 100, right: 100, bottom: 100, left: 100 };
+  // Detect mobile device early for use throughout the code
+  const isMobile = window.innerWidth <= 768;
+
+  // Set up responsive margins for the chart
+  const margin = isMobile
+    ? { top: 50, right: 20, bottom: 60, left: 60 } // Smaller margins for mobile
+    : { top: 100, right: 100, bottom: 100, left: 100 }; // Original margins for desktop
   const width = fullWidth - margin.left - margin.right;
   const height = fullHeight - margin.top - margin.bottom;
 
@@ -32,6 +37,8 @@
   let categories;
   let showCategories = false; // Default to showing problem origin data
   let showPercentage = false; // Default to showing count data
+  let persistentImage = null; // Track persistently shown image
+  let persistentConnector = null; // Track persistently shown connector
   // Tooltip div for hotspots
   const tooltip = d3
     .select("body")
@@ -152,7 +159,15 @@
     svg
       .select(".y-axis-label")
       .attr("class", "annotation")
-      .text(showPercentage ? "Percentage (%)" : "Count");
+      .text(
+        showPercentage
+          ? isMobile
+            ? "%"
+            : "Percentage (%)"
+          : isMobile
+          ? "Books"
+          : "Count"
+      );
 
     // Line generator function
     const line = d3
@@ -646,7 +661,8 @@
       .attr("width", width)
       .attr("height", height)
       .on("mousemove", onMouseMove)
-      .on("mouseleave", onMouseLeave);
+      .on("mouseleave", onMouseLeave)
+      .on("click", onBackgroundClick);
 
     // Mouse event handlers for universal hover
     function onMouseMove(event) {
@@ -755,6 +771,9 @@
     }
 
     function onMouseLeave() {
+      // Don't hide persistent images on mouse leave
+      if (persistentImage || persistentConnector) return;
+
       // Interrupt any ongoing transitions and hide all elements with fade
       Object.values(yearImages).forEach((img) => {
         img.interrupt().transition().duration(1000).style("opacity", 0);
@@ -769,6 +788,21 @@
         .transition()
         .duration(1000)
         .style("opacity", 0);
+    }
+
+    // Function to handle background clicks (hide persistent images)
+    function onBackgroundClick(event) {
+      // Only hide if clicking on background, not on hotspots or images
+      if (event.target === this && (persistentImage || persistentConnector)) {
+        if (persistentImage) {
+          persistentImage.transition().duration(300).style("opacity", 0);
+          persistentImage = null;
+        }
+        if (persistentConnector) {
+          persistentConnector.transition().duration(300).style("opacity", 0);
+          persistentConnector = null;
+        }
+      }
     }
 
     ///////////////////////////////////////////////////////////// ! Scales Definition
@@ -807,15 +841,16 @@
     // Keep y-axis text labels at full opacity
     svg.select(".y-axis").selectAll("text").style("opacity", 1);
 
-    // Add y-axis label
+    // Add y-axis label with responsive sizing
     svg
       .append("text")
-      .attr("class", "annotation")
+      .attr("class", "annotation y-axis-label")
       .attr("transform", "rotate(-90)")
       .attr("x", -height / 2)
-      .attr("y", -margin.left + 50)
+      .attr("y", isMobile ? -margin.left + 15 : -margin.left + 50)
       .style("text-anchor", "middle")
-      .text("Number of Books");
+      .style("font-size", isMobile ? "12px" : "14px")
+      .text(isMobile ? "Books" : "Number of Books");
 
     ///////////////////////////////////////////////////////////// ! Color Scales
     // Color scale for origin
@@ -881,8 +916,13 @@
     });
 
     ///////////////////////////////////////////////////////////// ! Legend Creation
-    // Add legend with background at top left
-    const legend = svg.append("g").attr("transform", `translate(10, -70)`); //
+    // Add legend with responsive layout
+    const legend = svg
+      .append("g")
+      .attr(
+        "transform",
+        isMobile ? `translate(10, -40)` : `translate(10, -70)`
+      );
 
     // Add legend title
     legend
@@ -890,78 +930,156 @@
       .attr("x", 10)
       .attr("y", 20)
       .attr("class", "annotation")
-      .attr("font-size", "14px")
+      .attr("font-size", isMobile ? "12px" : "14px")
       .text("Problem Origin:");
 
-    // Add origins to legend in a horizontal layout
-    ["THE WORLD", "YOU"].forEach((key, i) => {
-      const legendRow = legend
+    if (isMobile) {
+      // Calculate right-aligned position for mobile
+      const mobileRightOffset = width - 10; // 10px from right edge
+
+      // Remove legend title for mobile to save space
+      legend.select("text").remove();
+
+      // Create cleaner, right-aligned layout for mobile
+      const mobileItems = [
+        { key: "THE WORLD", color: "var(--color-teal)" },
+        { key: "YOU", color: "var(--color-orange)" },
+      ];
+
+      // Position items in a more compact, right-aligned layout
+      mobileItems.forEach((item, i) => {
+        const legendRow = legend
+          .append("g")
+          .attr(
+            "class",
+            `origin-legend ${item.key.toLowerCase().replace(" ", "-")}`
+          )
+          .attr(
+            "transform",
+            `translate(${mobileRightOffset - 80}, ${i * 20 + 5})`
+          );
+
+        legendRow
+          .append("rect")
+          .attr("width", 10)
+          .attr("height", 10)
+          .attr("fill", item.color)
+          .attr("x", 50) // Position rectangle to the right of text
+          .attr("y", -5);
+
+        legendRow
+          .append("text")
+          .attr("x", 45) // Position text to the left of rectangle
+          .attr("y", 3)
+          .attr("class", "annotation")
+          .style("font-size", "11px")
+          .style("text-anchor", "end")
+          .text(item.key);
+      });
+
+      // Position BEST SELLER aligned with other legend items
+      const bestSellerLegend = legend
         .append("g")
-        .attr("class", `origin-legend ${key.toLowerCase().replace(" ", "-")}`)
-        .attr("transform", `translate(${i * 150 + 150}, 7.5)`); // Moved left by reducing from 170 to 150
+        .attr("class", "origin-legend best-seller-legend")
+        .attr("transform", `translate(${mobileRightOffset - 80}, 35)`);
 
-      legendRow
-        .append("rect")
-        .attr("width", 15)
-        .attr("height", 15)
-        .attr(
-          "fill",
-          key === "THE WORLD" ? "var(--color-teal)" : "var(--color-orange)"
-        );
+      // Create circles for best seller, positioned like the rectangles above
+      bestSellerLegend
+        .append("circle")
+        .attr("cx", 50)
+        .attr("cy", 0)
+        .attr("r", 4)
+        .attr("fill", "none")
+        .attr("stroke", "var(--color-orange)")
+        .attr("stroke-width", 1.5);
 
-      legendRow
+      bestSellerLegend
+        .append("circle")
+        .attr("cx", 60)
+        .attr("cy", 0)
+        .attr("r", 4)
+        .attr("fill", "none")
+        .attr("stroke", "var(--color-teal)")
+        .attr("stroke-width", 1.5);
+
+      bestSellerLegend
         .append("text")
-        .attr("x", 25)
+        .attr("x", 45) // Same x position as other legend text
+        .attr("y", 3)
+        .attr("class", "annotation")
+        .style("font-size", "10px")
+        .style("text-anchor", "end")
+        .text("BEST SELLER");
+    } else {
+      // Horizontal layout for desktop (existing code)
+      ["THE WORLD", "YOU"].forEach((key, i) => {
+        const legendRow = legend
+          .append("g")
+          .attr("class", `origin-legend ${key.toLowerCase().replace(" ", "-")}`)
+          .attr("transform", `translate(${i * 150 + 150}, 7.5)`);
+
+        legendRow
+          .append("rect")
+          .attr("width", 15)
+          .attr("height", 15)
+          .attr(
+            "fill",
+            key === "THE WORLD" ? "var(--color-teal)" : "var(--color-orange)"
+          );
+
+        legendRow
+          .append("text")
+          .attr("x", 25)
+          .attr("y", 12.5)
+          .attr("class", "annotation")
+          .text(key);
+
+        // Add "vs." between the labels
+        if (i === 0) {
+          legend
+            .append("text")
+            .attr("class", "vs-text annotation")
+            .attr("x", 270)
+            .attr("y", 20)
+            .style("font-family", "Andale Mono")
+            .style("font-size", "14px")
+            .style("opacity", 0.5)
+            .style("text-anchor", "middle")
+            .text("vs.");
+        }
+      });
+
+      // Add BEST SELLER legend item for desktop
+      const bestSellerLegend = legend
+        .append("g")
+        .attr("class", "origin-legend best-seller-legend")
+        .attr("transform", `translate(${2 * 110 + 195}, 7.5)`);
+
+      bestSellerLegend
+        .append("circle")
+        .attr("cx", 7.5)
+        .attr("cy", 7.5)
+        .attr("r", 7)
+        .attr("fill", "none")
+        .attr("stroke", "var(--color-orange)")
+        .attr("stroke-width", 2);
+
+      bestSellerLegend
+        .append("circle")
+        .attr("cx", 27.5)
+        .attr("cy", 7.5)
+        .attr("r", 7)
+        .attr("fill", "none")
+        .attr("stroke", "var(--color-teal)")
+        .attr("stroke-width", 2);
+
+      bestSellerLegend
+        .append("text")
+        .attr("x", 45)
         .attr("y", 12.5)
         .attr("class", "annotation")
-        .text(key);
-
-      // Add "vs." between the labels
-      if (i === 0) {
-        legend
-          .append("text")
-          .attr("class", "vs-text annotation")
-          .attr("x", 270) // Moved left by reducing from 290 to 270
-          .attr("y", 20)
-          .style("font-family", "Andale Mono")
-          .style("font-size", "14px")
-          .style("opacity", 0.5)
-          .style("text-anchor", "middle")
-          .text("vs.");
-      }
-    });
-
-    // Add BEST SELLER legend item (black circle, white fill, black stroke, r=5)
-    const bestSellerLegend = legend
-      .append("g")
-      .attr("class", "origin-legend best-seller-legend")
-      .attr("transform", `translate(${2 * 110 + 195}, 7.5)`); // Adjusted spacing to match new layout
-
-    bestSellerLegend
-      .append("circle")
-      .attr("cx", 7.5)
-      .attr("cy", 7.5)
-      .attr("r", 7)
-      .attr("fill", "none")
-      .attr("stroke", "var(--color-orange)")
-      .attr("stroke-width", 2);
-
-    // Add teal circle to the right of the orange circle
-    bestSellerLegend
-      .append("circle")
-      .attr("cx", 27.5) // 20px to the right of the orange circle
-      .attr("cy", 7.5)
-      .attr("r", 7)
-      .attr("fill", "none")
-      .attr("stroke", "var(--color-teal)")
-      .attr("stroke-width", 2);
-
-    bestSellerLegend
-      .append("text")
-      .attr("x", 45)
-      .attr("y", 12.5)
-      .attr("class", "annotation")
-      .text("BEST SELLER");
+        .text("BEST SELLER");
+    }
 
     // Add button click handler for expanding chart
     d3.select("#expand-chart").on("click", function () {
@@ -1021,8 +1139,10 @@
         if (hotspotNode) {
           const cx = parseFloat(hotspot.attr("cx"));
           const cy = parseFloat(hotspot.attr("cy"));
-          const imageX = cx - 20;
-          const imageY = cy - 150;
+
+          // Position image below hotspot for mobile, above for desktop
+          const imageX = cx - (isMobile ? 75 : 20);
+          const imageY = isMobile ? cy + 50 : cy - 150; // Below hotspot on mobile
 
           // Add the image next to the hotspot
           svg
@@ -1032,8 +1152,8 @@
             .attr("x", imageX)
             .attr("y", imageY)
             .attr("transform", "rotate(10)")
-            .attr("width", 250)
-            .attr("height", 250)
+            .attr("width", window.innerWidth <= 768 ? 150 : 250)
+            .attr("height", window.innerWidth <= 768 ? 150 : 250)
             .style("opacity", 0)
             .style("pointer-events", "all") // Ensure image can receive events
             .style("filter", "drop-shadow(3px 3px 5px rgba(0,0,0,0.2))")
@@ -1041,15 +1161,18 @@
             .duration(1000)
             .style("opacity", 0.85);
 
-          // Add curved connector line from hotspot to image
+          // Add curved connector line from hotspot to image with responsive positioning
+          const imageCenterX = imageX + (isMobile ? 75 : 125);
+          const imageCenterY = imageY + (isMobile ? 75 : 125);
+          const controlX = isMobile ? cx + 15 : cx + 30;
+          const controlY = isMobile ? cy + 25 : cy - 50;
+
           svg
             .append("path")
             .attr("id", "smiles-connector")
             .attr(
               "d",
-              `M ${cx},${cy} Q ${cx + 30},${cy - 50} ${imageX + 125},${
-                imageY + 125
-              }`
+              `M ${cx},${cy} Q ${controlX},${controlY} ${imageCenterX},${imageCenterY}`
             )
             .style("fill", "none")
             .style("stroke", color("EXTERNAL"))
@@ -1066,6 +1189,17 @@
       // Show years through post-1920s
       currentVisibleCount = 16;
       updateChart();
+
+      // Add angled ticks for mobile on this step
+      if (window.innerWidth <= 768) {
+        svg
+          .select(".x-axis")
+          .selectAll("text")
+          .style("text-anchor", "end")
+          .attr("transform", "rotate(-45)")
+          .attr("dx", "-0.8em")
+          .attr("dy", "0.15em");
+      }
 
       // Remove any existing images and videos
       // Remove any existing connector lines
@@ -1127,24 +1261,24 @@
             imageFile = "conquest.jpg";
             imageId = "conquest-image";
             rotation = -8;
-            width = 150;
-            height = 250;
+            width = window.innerWidth <= 768 ? 100 : 150;
+            height = window.innerWidth <= 768 ? 150 : 250;
             xOffset = -170;
             yOffset = -180;
           } else if (d.year === "1920-1924") {
             imageFile = "napoleon.jpg";
             imageId = "napoleon-image";
             rotation = 5;
-            width = 240;
-            height = 260;
+            width = window.innerWidth <= 768 ? 150 : 240;
+            height = window.innerWidth <= 768 ? 160 : 260;
             xOffset = -240;
             yOffset = -240;
           } else if (d.year === "1935-1939") {
             imageFile = "carnegie.jpg";
             imageId = "carnegie-image";
             rotation = 3;
-            width = 150;
-            height = 230;
+            width = window.innerWidth <= 768 ? 100 : 150;
+            height = window.innerWidth <= 768 ? 150 : 230;
             xOffset = -180;
             yOffset = 10;
           }
@@ -1197,9 +1331,12 @@
             .style("z-index", "1")
             .style("filter", "drop-shadow(3px 3px 5px rgba(0,0,0,0.2))");
 
-          // Add hover event listeners
+          // Add hover and click event listeners
           hotspot
             .on("mouseenter", function () {
+              // Don't show hover if there's a persistent image
+              if (persistentImage || persistentConnector) return;
+
               // Immediately stop any ongoing transitions
               connector.interrupt();
               image.interrupt();
@@ -1222,6 +1359,13 @@
                 .style("opacity", 0.85);
             })
             .on("mouseleave", function () {
+              // Don't hide on mouse leave if this is a persistent image
+              if (
+                persistentImage === image ||
+                persistentConnector === connector
+              )
+                return;
+
               // Immediately stop any ongoing transitions
               connector.interrupt();
               image.interrupt();
@@ -1229,6 +1373,28 @@
               // Hide connector and image on mouse leave
               connector.transition().duration(300).style("opacity", 0);
               image.transition().duration(300).style("opacity", 0);
+            })
+            .on("click", function (event) {
+              event.stopPropagation();
+
+              // Hide any existing persistent image
+              if (persistentImage && persistentImage !== image) {
+                persistentImage.transition().duration(300).style("opacity", 0);
+              }
+              if (persistentConnector && persistentConnector !== connector) {
+                persistentConnector
+                  .transition()
+                  .duration(300)
+                  .style("opacity", 0);
+              }
+
+              // Make this image persistent
+              persistentImage = image;
+              persistentConnector = connector;
+
+              // Ensure image and connector are visible
+              connector.interrupt().style("opacity", 0.7);
+              image.interrupt().style("opacity", 0.85);
             });
         });
       }, 600);
@@ -1283,24 +1449,24 @@
             imageFile = "bodies.jpg";
             imageId = "bodies-image";
             rotation = -5;
-            width = 180;
-            height = 240;
+            width = window.innerWidth <= 768 ? 120 : 180;
+            height = window.innerWidth <= 768 ? 160 : 240;
             xOffset = -200;
             yOffset = -180;
           } else if (d.year === "1975-1979") {
             imageFile = "fear.jpg";
             imageId = "fear-image";
             rotation = 3;
-            width = 160;
-            height = 230;
+            width = window.innerWidth <= 768 ? 110 : 160;
+            height = window.innerWidth <= 768 ? 150 : 230;
             xOffset = -180;
             yOffset = -200;
           } else if (d.year === "1985-1989") {
             imageFile = "effective.jpg";
             imageId = "effective-image";
             rotation = 4;
-            width = 170;
-            height = 220;
+            width = window.innerWidth <= 768 ? 115 : 170;
+            height = window.innerWidth <= 768 ? 145 : 220;
             xOffset = -190;
             yOffset = -200;
           }
@@ -1353,9 +1519,12 @@
             .style("z-index", "1")
             .style("filter", "drop-shadow(3px 3px 5px rgba(0,0,0,0.2))");
 
-          // Add hover event listeners
+          // Add hover and click event listeners
           hotspot
             .on("mouseenter", function () {
+              // Don't show hover if there's a persistent image
+              if (persistentImage || persistentConnector) return;
+
               // Immediately stop any ongoing transitions
               connector.interrupt();
               image.interrupt();
@@ -1378,14 +1547,42 @@
                 .style("opacity", 0.85);
             })
             .on("mouseleave", function () {
+              // Don't hide on mouse leave if this is a persistent image
+              if (
+                persistentImage === image ||
+                persistentConnector === connector
+              )
+                return;
+
               // Immediately stop any ongoing transitions
               connector.interrupt();
               image.interrupt();
 
               // Hide connector and image on mouse leave
               connector.transition().duration(300).style("opacity", 0);
-
               image.transition().duration(300).style("opacity", 0);
+            })
+            .on("click", function (event) {
+              event.stopPropagation();
+
+              // Hide any existing persistent image
+              if (persistentImage && persistentImage !== image) {
+                persistentImage.transition().duration(300).style("opacity", 0);
+              }
+              if (persistentConnector && persistentConnector !== connector) {
+                persistentConnector
+                  .transition()
+                  .duration(300)
+                  .style("opacity", 0);
+              }
+
+              // Make this image persistent
+              persistentImage = image;
+              persistentConnector = connector;
+
+              // Ensure image and connector are visible
+              connector.interrupt().style("opacity", 0.7);
+              image.interrupt().style("opacity", 0.85);
             });
         });
       }, 600);
@@ -1420,8 +1617,8 @@
             id: "bed-image",
             origin: "INTERNAL",
             rotation: 5,
-            width: 180,
-            height: 240,
+            width: window.innerWidth <= 768 ? 120 : 180,
+            height: window.innerWidth <= 768 ? 160 : 240,
             xOffset: -200,
             yOffset: -50,
           },
@@ -1431,8 +1628,8 @@
             id: "bitch-image",
             origin: "INTERNAL",
             rotation: -3,
-            width: 160,
-            height: 230,
+            width: window.innerWidth <= 768 ? 110 : 160,
+            height: window.innerWidth <= 768 ? 150 : 230,
             xOffset: -180,
             yOffset: -200,
           },
@@ -1442,8 +1639,8 @@
             id: "rules-image",
             origin: "INTERNAL",
             rotation: 4,
-            width: 170,
-            height: 220,
+            width: window.innerWidth <= 768 ? 115 : 170,
+            height: window.innerWidth <= 768 ? 145 : 220,
             xOffset: -290,
             yOffset: -100,
           },
@@ -1525,9 +1722,12 @@
                   .style("z-index", "1")
                   .style("filter", "drop-shadow(3px 3px 5px rgba(0,0,0,0.2))");
 
-                // Add hover event listeners
+                // Add hover and click event listeners
                 hotspot
                   .on("mouseenter", function () {
+                    // Don't show hover if there's a persistent image
+                    if (persistentImage || persistentConnector) return;
+
                     // Immediately stop any ongoing transitions
                     connector.interrupt();
                     image.interrupt();
@@ -1550,6 +1750,13 @@
                       .style("opacity", 0.85);
                   })
                   .on("mouseleave", function () {
+                    // Don't hide on mouse leave if this is a persistent image
+                    if (
+                      persistentImage === image ||
+                      persistentConnector === connector
+                    )
+                      return;
+
                     // Immediately stop any ongoing transitions
                     connector.interrupt();
                     image.interrupt();
@@ -1557,6 +1764,34 @@
                     // Hide connector and image on mouse leave
                     connector.transition().duration(300).style("opacity", 0);
                     image.transition().duration(300).style("opacity", 0);
+                  })
+                  .on("click", function (event) {
+                    event.stopPropagation();
+
+                    // Hide any existing persistent image
+                    if (persistentImage && persistentImage !== image) {
+                      persistentImage
+                        .transition()
+                        .duration(300)
+                        .style("opacity", 0);
+                    }
+                    if (
+                      persistentConnector &&
+                      persistentConnector !== connector
+                    ) {
+                      persistentConnector
+                        .transition()
+                        .duration(300)
+                        .style("opacity", 0);
+                    }
+
+                    // Make this image persistent
+                    persistentImage = image;
+                    persistentConnector = connector;
+
+                    // Ensure image and connector are visible
+                    connector.interrupt().style("opacity", 0.7);
+                    image.interrupt().style("opacity", 0.85);
                   });
               });
           }

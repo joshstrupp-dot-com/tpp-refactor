@@ -616,7 +616,7 @@
             text-align: center;
             font-family: 'Andale Mono', monospace;
             font-weight: 200;
-            font-size: 12px;
+            font-size: ${window.innerWidth <= 768 ? "8px" : "12px"};
             color: #000;
             overflow: hidden;
             text-overflow: ellipsis;

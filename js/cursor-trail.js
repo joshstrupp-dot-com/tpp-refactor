@@ -1,5 +1,16 @@
 // Cursor trail effect with book cover images
 document.addEventListener("DOMContentLoaded", function () {
+  // Check if device is mobile
+  const isMobile =
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    ) || window.innerWidth <= 768;
+
+  // Exit early if on mobile device
+  if (isMobile) {
+    return;
+  }
+
   // Book cover images to use in the trail
   const BOOK_COVERS = [
     "whydoeshe.jpg",
