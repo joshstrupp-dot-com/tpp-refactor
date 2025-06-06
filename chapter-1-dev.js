@@ -60,8 +60,17 @@
   preloadAllData();
 
   ///////////////////////////////////////////////////////////// ! Setup and Configuration
-  // First, adjust the chapter-1 div to fill the viewport
+  // Find the chapter-1 container
   const chapter1Div = document.getElementById("chapter-1");
+
+  if (!chapter1Div) {
+    console.error("#chapter-1 container not found");
+    return;
+  }
+
+  console.log("Using container:", chapter1Div.id);
+
+  // Configure the container
   chapter1Div.style.width = "100vw";
   chapter1Div.style.height = "100vh";
   chapter1Div.style.margin = "0";

@@ -221,6 +221,8 @@ const chapter1StepsConfig = [
         .style("pointer-events", "none")
         .style("z-index", "2000");
 
+      // No longer preloading rectangles here - using data preloading instead
+
       // Get all PNG files from the directory
       fetch("assets/smoke-screen-images/")
         .then((response) => response.text())
@@ -374,6 +376,9 @@ const chapter1StepsConfig = [
         existingOverlay.remove();
       }
 
+      // Always load fresh but use preloaded data
+      console.log("Loading fastest-growing visualization with preloaded data");
+
       // Clear existing content
       const figure = d3.select("#figure-container");
       figure.html("");
@@ -390,14 +395,14 @@ const chapter1StepsConfig = [
       script.src = "./chapter-1-dev.js";
       document.body.appendChild(script);
 
-      // Dispatch intro state first
+      // Since data is preloaded, reduce the delay before starting animation
       setTimeout(() => {
         document.dispatchEvent(
           new CustomEvent("visualizationUpdate", {
             detail: { step: "intro" },
           })
         );
-      }, 500);
+      }, 0); // Much shorter delay since data should be ready
 
       // After 3 seconds, transition to intro-2 (category piles)
       setTimeout(() => {
@@ -406,7 +411,7 @@ const chapter1StepsConfig = [
             detail: { step: "intro-2" },
           })
         );
-      }, 5500);
+      }, 3200);
     },
   },
 
