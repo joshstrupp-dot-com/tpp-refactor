@@ -204,6 +204,9 @@
   let zoomedIn = false;
   let activeRectangle = null;
 
+  // Track if data display is complete
+  let dataDisplayComplete = false;
+
   // Define categories globally for reuse
   // Self-help categories (teal/internal)
   const selfHelpCategories = [
@@ -229,9 +232,22 @@
   ///////////////////////////////////////////////////////////// ! Data Display Function
   // Function to display data as a grid of rectangles
   function displayData(data) {
+    console.log(
+      "displayData called with data:",
+      data ? data.length : "null",
+      "records"
+    );
+
     if (data && data.length > 0) {
       // Calculate how many records we can display
       const recordsToDisplay = Math.min(data.length, totalRectangles);
+      console.log(
+        "Will display",
+        recordsToDisplay,
+        "records out of",
+        totalRectangles,
+        "total rectangles"
+      );
 
       // Add tooltip div to body
       const tooltip = d3.select("body").append("div").attr("class", "tooltip");
@@ -254,6 +270,7 @@
       }
 
       // Batch create rectangles for better performance
+      console.log("Creating", rects.length, "rectangle elements");
       const rectElements = g
         .selectAll("rect")
         .data(rects)
@@ -295,6 +312,12 @@
           // Hide tooltip
           tooltip.style("opacity", 0);
         });
+
+      console.log("Rectangle elements created:", rectElements.size());
+
+      // Mark data display as complete
+      dataDisplayComplete = true;
+      console.log("Data display complete, ready for animations");
 
       // Add click handler to background to zoom out
       svg.on("click", function (event) {
@@ -394,52 +417,93 @@
     displayData(fakeData);
   }
 
+  ///////////////////////////////////////////////////////////// ! Helper Functions
+  // Function to process the intro step with animation
+  function processIntroStep() {
+    // Reset/initial view
+    svg
+      .transition()
+      .duration(0)
+      .call(
+        zoom.transform,
+        d3.zoomIdentity.translate(margin.left, margin.top).scale(1)
+      );
+    zoomedIn = false;
+    g.selectAll("rect").attr("fill", "var(--color-base-darker)");
+
+    // Position all rectangles in their grid positions but with opacity 0
+    g.selectAll("rect")
+      .attr("x", (d, i) => (i % rectsPerRow) * totalRectWidth + spacing)
+      .attr(
+        "y",
+        (d, i) => Math.floor(i / rectsPerRow) * totalRectHeight + spacing
+      )
+      .style("opacity", 0);
+
+    // Check if rectangles exist before starting animation
+    const allRects = g.selectAll("rect");
+    console.log("Total rectangles found for animation:", allRects.size());
+
+    if (allRects.empty()) {
+      console.warn("No rectangles found! Animation cannot proceed.");
+      return;
+    }
+
+    // Batch transitions for better performance
+    const transitions = [];
+    console.log("Starting row-by-row animation for", rectsPerColumn, "rows");
+    for (let row = 0; row < rectsPerColumn; row++) {
+      const rowRects = g
+        .selectAll("rect")
+        .filter((d, i) => Math.floor(i / rectsPerRow) === row);
+
+      console.log(`Row ${row}: ${rowRects.size()} rectangles`);
+
+      transitions.push(
+        rowRects
+          .transition()
+          .delay(row * 30) // Further reduced delay for smoother appearance
+          .duration(150) // Shorter duration for snappier feel
+          .ease(d3.easeCubicInOut)
+          .style("opacity", 1)
+      );
+    }
+    console.log(
+      "Animation transitions started for",
+      transitions.length,
+      "rows"
+    );
+
+    // Remove any category labels
+    g.selectAll(".category-label").remove();
+  }
+
   ///////////////////////////////////////////////////////////// ! Event Handling
   document.addEventListener("visualizationUpdate", (event) => {
     const stepId = event.detail.step;
+    console.log("visualizationUpdate event received for step:", stepId);
 
     // Apply step-specific changes to your visualization
     if (stepId === "intro") {
-      // Reset/initial view
-      svg
-        .transition()
-        .duration(0)
-        .call(
-          zoom.transform,
-          d3.zoomIdentity.translate(margin.left, margin.top).scale(1)
-        );
-      zoomedIn = false;
-      g.selectAll("rect").attr("fill", "var(--color-base-darker)");
+      console.log("Processing intro step - showing rectangles with animation");
+      console.log("Data display complete status:", dataDisplayComplete);
 
-      // Position all rectangles in their grid positions but with opacity 0
-      g.selectAll("rect")
-        .attr("x", (d, i) => (i % rectsPerRow) * totalRectWidth + spacing)
-        .attr(
-          "y",
-          (d, i) => Math.floor(i / rectsPerRow) * totalRectHeight + spacing
-        )
-        .style("opacity", 0);
-
-      // Batch transitions for better performance
-      const transitions = [];
-      for (let row = 0; row < rectsPerColumn; row++) {
-        const rowRects = g
-          .selectAll("rect")
-          .filter((d, i) => Math.floor(i / rectsPerRow) === row);
-
-        transitions.push(
-          rowRects
-            .transition()
-            .delay(row * 30) // Further reduced delay for smoother appearance
-            .duration(150) // Shorter duration for snappier feel
-            .ease(d3.easeCubicInOut)
-            .style("opacity", 1)
-        );
+      // If data display isn't complete yet, wait for it
+      if (!dataDisplayComplete) {
+        console.log("Data not ready, waiting...");
+        const checkDataReady = () => {
+          if (dataDisplayComplete) {
+            console.log("Data now ready, proceeding with intro animation");
+            processIntroStep();
+          } else {
+            setTimeout(checkDataReady, 100);
+          }
+        };
+        checkDataReady();
+        return;
       }
 
-      // Remove any category labels
-      g.selectAll(".category-label").remove();
-      ///////////////////////////////////////////////////////////// ! organize by category
+      processIntroStep();
     } else if (stepId === "book-emphasis") {
       // Reset/initial view similar to intro
       svg
