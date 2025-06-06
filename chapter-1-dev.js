@@ -1,5 +1,5 @@
 // Chapter 1 - Simple Data Visualization
-(function () {
+(async function () {
   ///////////////////////////////////////////////////////////// ! Data Preloading
   // Global data cache
   window.dataCache = window.dataCache || {};
@@ -70,9 +70,36 @@
   chapter1Div.style.overflow = "hidden";
   chapter1Div.style.position = "relative";
 
-  // Get the actual dimensions of the container
-  const width = chapter1Div.clientWidth;
-  const height = chapter1Div.clientHeight;
+  // Wait for container to be properly sized before proceeding
+  function waitForDimensions() {
+    return new Promise((resolve) => {
+      let attempts = 0;
+      const maxAttempts = 40; // 2 seconds maximum wait
+
+      const checkDimensions = () => {
+        const width = chapter1Div.clientWidth || window.innerWidth;
+        const height = chapter1Div.clientHeight || window.innerHeight;
+
+        if (width > 0 && height > 0) {
+          console.log(`Container dimensions ready: ${width}x${height}`);
+          resolve({ width, height });
+        } else if (attempts >= maxAttempts) {
+          // Fallback to viewport dimensions after timeout
+          console.warn(
+            "Container dimensions timeout, using viewport dimensions"
+          );
+          resolve({ width: window.innerWidth, height: window.innerHeight });
+        } else {
+          attempts++;
+          setTimeout(checkDimensions, 50);
+        }
+      };
+      checkDimensions();
+    });
+  }
+
+  // Get the actual dimensions of the container with fallback to viewport
+  const { width, height } = await waitForDimensions();
 
   // Set up margins for the chart
   const margin = { top: 0, right: 20, bottom: 20, left: 20 };
@@ -115,18 +142,47 @@
   );
 
   ///////////////////////////////////////////////////////////// ! Create SVG
-  // Create SVG container with 100% dimensions
-  const svg = d3
-    .select("#chapter-1")
-    .append("svg")
-    .attr("width", "100%")
-    .attr("height", "100%")
-    .style("display", "block");
+  // Create SVG container with explicit pixel dimensions
+  let svg;
+  try {
+    svg = d3
+      .select("#chapter-1")
+      .append("svg")
+      .attr("width", width)
+      .attr("height", height)
+      .style("display", "block");
+
+    console.log(`SVG created successfully with dimensions: ${width}x${height}`);
+  } catch (error) {
+    console.error("Error creating SVG:", error);
+    // Try fallback approach
+    svg = d3
+      .select("#chapter-1")
+      .append("svg")
+      .style("width", "100vw")
+      .style("height", "100vh")
+      .style("display", "block");
+  }
 
   // Add a group for zoom transformation
   const g = svg
     .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
+
+  // Add window resize handler to update SVG dimensions
+  let resizeTimeout;
+  window.addEventListener("resize", () => {
+    // Debounce resize events
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      const newWidth = chapter1Div.clientWidth || window.innerWidth;
+      const newHeight = chapter1Div.clientHeight || window.innerHeight;
+
+      if (newWidth > 0 && newHeight > 0) {
+        svg.attr("width", newWidth).attr("height", newHeight);
+      }
+    }, 100);
+  });
 
   ///////////////////////////////////////////////////////////// ! Zoom Behavior
   // Create zoom behavior
