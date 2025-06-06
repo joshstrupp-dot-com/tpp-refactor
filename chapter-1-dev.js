@@ -4,6 +4,11 @@
   // Global data cache
   window.dataCache = window.dataCache || {};
 
+  // Detect if the current device is likely a mobile device
+  const isMobile =
+    /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+    window.innerWidth <= 768;
+
   // Preload all needed datasets at the start
   function preloadAllData() {
     // Preload time data
@@ -11,6 +16,10 @@
       console.log("Preloading time data");
       d3.csv("./data/sh_0415_time/sh_0415_time.csv")
         .then(function (data) {
+          // On mobile, keep only the first 10,000 records for performance
+          if (isMobile && data.length > 10000) {
+            data = data.slice(0, 10000);
+          }
           window.dataCache.timeData = data;
           console.log("Time data preloaded:", data.length, "records");
 
@@ -29,6 +38,10 @@
       console.log("Preloading author data");
       d3.csv("./data/sh_0415_author/author.csv")
         .then(function (data) {
+          // On mobile, keep only the first 10,000 records for performance
+          if (isMobile && data.length > 10000) {
+            data = data.slice(0, 10000);
+          }
           window.dataCache.authorData = data;
           console.log("Author data preloaded:", data.length, "records");
 
@@ -68,7 +81,8 @@
 
   ///////////////////////////////////////////////////////////// ! Rectangle Calculations
   // Target number of rectangles (approximate)
-  const targetCount = 45000; // Adjust this number based on desired density
+  // Use a smaller target count on mobile devices for better performance
+  const targetCount = isMobile ? 10000 : 45000;
   const spacing = 1;
 
   // Calculate rectangle dimensions to fit the available space
@@ -262,6 +276,10 @@
       console.log("Loading time data directly");
       d3.csv("./data/sh_0415_time/sh_0415_time.csv")
         .then((data) => {
+          // On mobile, keep only the first 10,000 records for performance
+          if (isMobile && data.length > 10000) {
+            data = data.slice(0, 10000);
+          }
           console.log("Time data loaded:", data.length, "records");
           displayData(data);
         })
@@ -281,12 +299,19 @@
                 });
                 return obj;
               });
+
+              // On mobile, keep only the first 10,000 records for performance
+              const limitedData =
+                isMobile && parsedData.length > 10000
+                  ? parsedData.slice(0, 10000)
+                  : parsedData;
+
               console.log(
                 "Time data loaded via fetch:",
-                parsedData.length,
+                limitedData.length,
                 "records"
               );
-              displayData(parsedData);
+              displayData(limitedData);
             })
             .catch((error) => {
               console.error("Error loading data:", error);
