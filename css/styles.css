@@ -296,6 +296,11 @@ figure {
   transform: translate3d(0, 0, 0);
   z-index: 500;
   /* pointer-events: none; */
+  overflow-x: hidden;
+}
+
+#chapter-1-grid {
+  overflow-x: hidden;
 }
 
 figure.fullwidth {

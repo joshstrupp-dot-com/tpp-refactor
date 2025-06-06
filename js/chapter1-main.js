@@ -19,8 +19,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Preload data specifically for chapter 1
   window.dataCache = window.dataCache || {};
+
+  function isMobileDevice() {
+    return window.matchMedia("(max-width: 700px)").matches;
+  }
+
+  window.isMobileDevice = isMobileDevice;
+
+  // Choose dataset based on device type
+  const datasetUrl = isMobileDevice()
+    ? "data/sh_train_subset.csv"
+    : "data/sh_train_0409.csv";
+
+  window.dataCache.datasetUrl = datasetUrl;
+
   // Chapter 1 uses some data for the blame game and fastest growing visualizations
-  d3.csv("data/sh_train_0409.csv").then((data) => {
+  d3.csv(datasetUrl).then((data) => {
     window.dataCache.bookData = data;
   });
 

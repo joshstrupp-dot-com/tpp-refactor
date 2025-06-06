@@ -23,14 +23,14 @@
   document.body.appendChild(absoluteContainer);
 
   // Set container styles
-  gridContainer.style.width = "110%";
-  gridContainer.style.height = "110%";
+  gridContainer.style.width = "100%";
+  gridContainer.style.height = "100%";
   gridContainer.style.fontFamily = "Andale Mono, monospace";
   gridContainer.style.fontSize = "24px";
   gridContainer.style.color = "var(--color-base-darker)";
   gridContainer.style.position = "relative";
-  gridContainer.style.left = "-5%";
-  gridContainer.style.top = "-5%";
+  gridContainer.style.left = "0";
+  gridContainer.style.top = "0";
 
   // Create a map to store book positions from the blame-game step
   const bookPositions = new Map();
@@ -84,8 +84,19 @@
   window.blameGameAnimationPlayed = true;
 
   // Load and display book covers in a more compact grid with entry animation
-  d3.csv("data/sh_train_0409.csv")
-    .then((data) => {
+  const datasetUrl =
+    window.dataCache && window.dataCache.datasetUrl
+      ? window.dataCache.datasetUrl
+      : window.isMobileDevice && window.isMobileDevice()
+      ? "data/sh_train_subset.csv"
+      : "data/sh_train_0409.csv";
+
+  const dataPromise =
+    window.dataCache && window.dataCache.bookData
+      ? Promise.resolve(window.dataCache.bookData)
+      : d3.csv(datasetUrl);
+
+  dataPromise.then((data) => {
       // Create a map to track which positions are already taken by specific books
       const takenPositions = new Set(
         specificBooks.map((book) => book.position)
