@@ -644,4 +644,35 @@ figure p {
   .scrolling-words-box li {
     height: 2.5rem !important;
   }
+
+  /* ---------- Layout fixes for small screens ---------- */
+  /* Stack scrolly content vertically to avoid extra width */
+  #scrolly {
+    flex-direction: column;
+  }
+  #scrolly > * {
+    flex: none;
+    width: 100%;
+  }
+
+  /* Ensure article and figure don't exceed viewport width */
+  article,
+  figure,
+  figure.fullwidth {
+    max-width: 100vw;
+  }
+
+  /* Soften ladder indents further so title never exceeds viewport */
+  .ladder-step:nth-child(2) {
+    margin-left: 1vw;
+  }
+  .ladder-step:nth-child(3) {
+    margin-left: 3vw;
+  }
+  .ladder-step:nth-child(4) {
+    margin-left: 4vw;
+  }
+  .ladder-step:nth-child(5) {
+    margin-left: 5vw;
+  }
 }

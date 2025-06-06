@@ -19,10 +19,61 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Preload data specifically for chapter 1
   window.dataCache = window.dataCache || {};
+
   // Chapter 1 uses some data for the blame game and fastest growing visualizations
   d3.csv("data/sh_train_0409.csv").then((data) => {
     window.dataCache.bookData = data;
+    console.log("Chapter 1: sh_train data preloaded");
   });
+
+  // CRITICAL: Preload fastest-growing data immediately when page loads
+  console.log("Chapter 1: Starting fastest-growing data preload...");
+
+  // Preload time data for fastest-growing
+  d3.csv("./data/sh_0415_time/sh_0415_time.csv")
+    .then(function (data) {
+      // On mobile, keep only the first 10,000 records for performance
+      const isMobile =
+        /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+        window.innerWidth <= 768;
+
+      if (isMobile && data.length > 10000) {
+        data = data.slice(0, 10000);
+      }
+
+      window.dataCache.timeData = data;
+      console.log(
+        "Chapter 1: Time data preloaded early:",
+        data.length,
+        "records"
+      );
+    })
+    .catch(function (error) {
+      console.error("Chapter 1: Error preloading time data:", error);
+    });
+
+  // Preload author data for fastest-growing
+  d3.csv("./data/sh_0415_author/author.csv")
+    .then(function (data) {
+      // On mobile, keep only the first 10,000 records for performance
+      const isMobile =
+        /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+        window.innerWidth <= 768;
+
+      if (isMobile && data.length > 10000) {
+        data = data.slice(0, 10000);
+      }
+
+      window.dataCache.authorData = data;
+      console.log(
+        "Chapter 1: Author data preloaded early:",
+        data.length,
+        "records"
+      );
+    })
+    .catch(function (error) {
+      console.error("Chapter 1: Error preloading author data:", error);
+    });
 
   // Generic window resize listener event
   function handleResize() {

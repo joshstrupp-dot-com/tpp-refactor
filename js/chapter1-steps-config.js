@@ -221,6 +221,8 @@ const chapter1StepsConfig = [
         .style("pointer-events", "none")
         .style("z-index", "2000");
 
+      // No longer preloading rectangles here - using data preloading instead
+
       // Get all PNG files from the directory
       fetch("assets/smoke-screen-images/")
         .then((response) => response.text())
@@ -374,6 +376,9 @@ const chapter1StepsConfig = [
         existingOverlay.remove();
       }
 
+      // Always load fresh but use preloaded data
+      console.log("Loading fastest-growing visualization with preloaded data");
+
       // Clear existing content
       const figure = d3.select("#figure-container");
       figure.html("");
@@ -385,28 +390,29 @@ const chapter1StepsConfig = [
         .style("width", "100%")
         .style("height", "100%");
 
-      // Load and execute chapter-1-dev.js
+      // Load and execute chapter-1-dev.js, then trigger visualization steps
       const script = document.createElement("script");
       script.src = "./chapter-1-dev.js";
-      document.body.appendChild(script);
 
-      // Dispatch intro state first
-      setTimeout(() => {
+      script.onload = () => {
+        // Intro step – reveal the grid instantly (no animation needed for appearance)
         document.dispatchEvent(
           new CustomEvent("visualizationUpdate", {
             detail: { step: "intro" },
           })
         );
-      }, 500);
 
-      // After 3 seconds, transition to intro-2 (category piles)
-      setTimeout(() => {
-        document.dispatchEvent(
-          new CustomEvent("visualizationUpdate", {
-            detail: { step: "intro-2" },
-          })
-        );
-      }, 5500);
+        // After 3.2 s sort into category piles (intro-2)
+        setTimeout(() => {
+          document.dispatchEvent(
+            new CustomEvent("visualizationUpdate", {
+              detail: { step: "intro-2" },
+            })
+          );
+        }, 3200);
+      };
+
+      document.body.appendChild(script);
     },
   },
 

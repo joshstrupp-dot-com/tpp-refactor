@@ -1,8 +1,13 @@
 // Chapter 1 - Simple Data Visualization
-(function () {
+(async function () {
   ///////////////////////////////////////////////////////////// ! Data Preloading
   // Global data cache
   window.dataCache = window.dataCache || {};
+
+  // Detect if the current device is likely a mobile device
+  const isMobile =
+    /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+    window.innerWidth <= 768;
 
   // Preload all needed datasets at the start
   function preloadAllData() {
@@ -11,6 +16,10 @@
       console.log("Preloading time data");
       d3.csv("./data/sh_0415_time/sh_0415_time.csv")
         .then(function (data) {
+          // On mobile, keep only the first 10,000 records for performance
+          if (isMobile && data.length > 10000) {
+            data = data.slice(0, 10000);
+          }
           window.dataCache.timeData = data;
           console.log("Time data preloaded:", data.length, "records");
 
@@ -29,6 +38,10 @@
       console.log("Preloading author data");
       d3.csv("./data/sh_0415_author/author.csv")
         .then(function (data) {
+          // On mobile, keep only the first 10,000 records for performance
+          if (isMobile && data.length > 10000) {
+            data = data.slice(0, 10000);
+          }
           window.dataCache.authorData = data;
           console.log("Author data preloaded:", data.length, "records");
 
@@ -47,8 +60,17 @@
   preloadAllData();
 
   ///////////////////////////////////////////////////////////// ! Setup and Configuration
-  // First, adjust the chapter-1 div to fill the viewport
+  // Find the chapter-1 container
   const chapter1Div = document.getElementById("chapter-1");
+
+  if (!chapter1Div) {
+    console.error("#chapter-1 container not found");
+    return;
+  }
+
+  console.log("Using container:", chapter1Div.id);
+
+  // Configure the container
   chapter1Div.style.width = "100vw";
   chapter1Div.style.height = "100vh";
   chapter1Div.style.margin = "0";
@@ -57,9 +79,36 @@
   chapter1Div.style.overflow = "hidden";
   chapter1Div.style.position = "relative";
 
-  // Get the actual dimensions of the container
-  const width = chapter1Div.clientWidth;
-  const height = chapter1Div.clientHeight;
+  // Wait for container to be properly sized before proceeding
+  function waitForDimensions() {
+    return new Promise((resolve) => {
+      let attempts = 0;
+      const maxAttempts = 40; // 2 seconds maximum wait
+
+      const checkDimensions = () => {
+        const width = chapter1Div.clientWidth || window.innerWidth;
+        const height = chapter1Div.clientHeight || window.innerHeight;
+
+        if (width > 0 && height > 0) {
+          console.log(`Container dimensions ready: ${width}x${height}`);
+          resolve({ width, height });
+        } else if (attempts >= maxAttempts) {
+          // Fallback to viewport dimensions after timeout
+          console.warn(
+            "Container dimensions timeout, using viewport dimensions"
+          );
+          resolve({ width: window.innerWidth, height: window.innerHeight });
+        } else {
+          attempts++;
+          setTimeout(checkDimensions, 50);
+        }
+      };
+      checkDimensions();
+    });
+  }
+
+  // Get the actual dimensions of the container with fallback to viewport
+  const { width, height } = await waitForDimensions();
 
   // Set up margins for the chart
   const margin = { top: 0, right: 20, bottom: 20, left: 20 };
@@ -68,7 +117,8 @@
 
   ///////////////////////////////////////////////////////////// ! Rectangle Calculations
   // Target number of rectangles (approximate)
-  const targetCount = 45000; // Adjust this number based on desired density
+  // Use a smaller target count on mobile devices for better performance
+  const targetCount = isMobile ? 10000 : 45000;
   const spacing = 1;
 
   // Calculate rectangle dimensions to fit the available space
@@ -101,18 +151,47 @@
   );
 
   ///////////////////////////////////////////////////////////// ! Create SVG
-  // Create SVG container with 100% dimensions
-  const svg = d3
-    .select("#chapter-1")
-    .append("svg")
-    .attr("width", "100%")
-    .attr("height", "100%")
-    .style("display", "block");
+  // Create SVG container with explicit pixel dimensions
+  let svg;
+  try {
+    svg = d3
+      .select("#chapter-1")
+      .append("svg")
+      .attr("width", width)
+      .attr("height", height)
+      .style("display", "block");
+
+    console.log(`SVG created successfully with dimensions: ${width}x${height}`);
+  } catch (error) {
+    console.error("Error creating SVG:", error);
+    // Try fallback approach
+    svg = d3
+      .select("#chapter-1")
+      .append("svg")
+      .style("width", "100vw")
+      .style("height", "100vh")
+      .style("display", "block");
+  }
 
   // Add a group for zoom transformation
   const g = svg
     .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
+
+  // Add window resize handler to update SVG dimensions
+  let resizeTimeout;
+  window.addEventListener("resize", () => {
+    // Debounce resize events
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      const newWidth = chapter1Div.clientWidth || window.innerWidth;
+      const newHeight = chapter1Div.clientHeight || window.innerHeight;
+
+      if (newWidth > 0 && newHeight > 0) {
+        svg.attr("width", newWidth).attr("height", newHeight);
+      }
+    }, 100);
+  });
 
   ///////////////////////////////////////////////////////////// ! Zoom Behavior
   // Create zoom behavior
@@ -133,6 +212,9 @@
   // Variable to track if we've zoomed in on a specific book
   let zoomedIn = false;
   let activeRectangle = null;
+
+  // Track if data display is complete
+  let dataDisplayComplete = false;
 
   // Define categories globally for reuse
   // Self-help categories (teal/internal)
@@ -159,9 +241,22 @@
   ///////////////////////////////////////////////////////////// ! Data Display Function
   // Function to display data as a grid of rectangles
   function displayData(data) {
+    console.log(
+      "displayData called with data:",
+      data ? data.length : "null",
+      "records"
+    );
+
     if (data && data.length > 0) {
       // Calculate how many records we can display
       const recordsToDisplay = Math.min(data.length, totalRectangles);
+      console.log(
+        "Will display",
+        recordsToDisplay,
+        "records out of",
+        totalRectangles,
+        "total rectangles"
+      );
 
       // Add tooltip div to body
       const tooltip = d3.select("body").append("div").attr("class", "tooltip");
@@ -184,6 +279,7 @@
       }
 
       // Batch create rectangles for better performance
+      console.log("Creating", rects.length, "rectangle elements");
       const rectElements = g
         .selectAll("rect")
         .data(rects)
@@ -226,6 +322,12 @@
           tooltip.style("opacity", 0);
         });
 
+      console.log("Rectangle elements created:", rectElements.size());
+
+      // Mark data display as complete
+      dataDisplayComplete = true;
+      console.log("Data display complete, ready for animations");
+
       // Add click handler to background to zoom out
       svg.on("click", function (event) {
         if (zoomedIn && !event.defaultPrevented) {
@@ -262,6 +364,10 @@
       console.log("Loading time data directly");
       d3.csv("./data/sh_0415_time/sh_0415_time.csv")
         .then((data) => {
+          // On mobile, keep only the first 10,000 records for performance
+          if (isMobile && data.length > 10000) {
+            data = data.slice(0, 10000);
+          }
           console.log("Time data loaded:", data.length, "records");
           displayData(data);
         })
@@ -281,12 +387,19 @@
                 });
                 return obj;
               });
+
+              // On mobile, keep only the first 10,000 records for performance
+              const limitedData =
+                isMobile && parsedData.length > 10000
+                  ? parsedData.slice(0, 10000)
+                  : parsedData;
+
               console.log(
                 "Time data loaded via fetch:",
-                parsedData.length,
+                limitedData.length,
                 "records"
               );
-              displayData(parsedData);
+              displayData(limitedData);
             })
             .catch((error) => {
               console.error("Error loading data:", error);
@@ -313,52 +426,93 @@
     displayData(fakeData);
   }
 
+  ///////////////////////////////////////////////////////////// ! Helper Functions
+  // Function to process the intro step with animation
+  function processIntroStep() {
+    // Reset/initial view
+    svg
+      .transition()
+      .duration(0)
+      .call(
+        zoom.transform,
+        d3.zoomIdentity.translate(margin.left, margin.top).scale(1)
+      );
+    zoomedIn = false;
+    g.selectAll("rect").attr("fill", "var(--color-base-darker)");
+
+    // Position all rectangles in their grid positions but with opacity 0
+    g.selectAll("rect")
+      .attr("x", (d, i) => (i % rectsPerRow) * totalRectWidth + spacing)
+      .attr(
+        "y",
+        (d, i) => Math.floor(i / rectsPerRow) * totalRectHeight + spacing
+      )
+      .style("opacity", 0);
+
+    // Check if rectangles exist before starting animation
+    const allRects = g.selectAll("rect");
+    console.log("Total rectangles found for animation:", allRects.size());
+
+    if (allRects.empty()) {
+      console.warn("No rectangles found! Animation cannot proceed.");
+      return;
+    }
+
+    // Batch transitions for better performance
+    const transitions = [];
+    console.log("Starting row-by-row animation for", rectsPerColumn, "rows");
+    for (let row = 0; row < rectsPerColumn; row++) {
+      const rowRects = g
+        .selectAll("rect")
+        .filter((d, i) => Math.floor(i / rectsPerRow) === row);
+
+      console.log(`Row ${row}: ${rowRects.size()} rectangles`);
+
+      transitions.push(
+        rowRects
+          .transition()
+          .delay(row * 30) // Further reduced delay for smoother appearance
+          .duration(150) // Shorter duration for snappier feel
+          .ease(d3.easeCubicInOut)
+          .style("opacity", 1)
+      );
+    }
+    console.log(
+      "Animation transitions started for",
+      transitions.length,
+      "rows"
+    );
+
+    // Remove any category labels
+    g.selectAll(".category-label").remove();
+  }
+
   ///////////////////////////////////////////////////////////// ! Event Handling
   document.addEventListener("visualizationUpdate", (event) => {
     const stepId = event.detail.step;
+    console.log("visualizationUpdate event received for step:", stepId);
 
     // Apply step-specific changes to your visualization
     if (stepId === "intro") {
-      // Reset/initial view
-      svg
-        .transition()
-        .duration(0)
-        .call(
-          zoom.transform,
-          d3.zoomIdentity.translate(margin.left, margin.top).scale(1)
-        );
-      zoomedIn = false;
-      g.selectAll("rect").attr("fill", "var(--color-base-darker)");
+      console.log("Processing intro step - showing rectangles with animation");
+      console.log("Data display complete status:", dataDisplayComplete);
 
-      // Position all rectangles in their grid positions but with opacity 0
-      g.selectAll("rect")
-        .attr("x", (d, i) => (i % rectsPerRow) * totalRectWidth + spacing)
-        .attr(
-          "y",
-          (d, i) => Math.floor(i / rectsPerRow) * totalRectHeight + spacing
-        )
-        .style("opacity", 0);
-
-      // Batch transitions for better performance
-      const transitions = [];
-      for (let row = 0; row < rectsPerColumn; row++) {
-        const rowRects = g
-          .selectAll("rect")
-          .filter((d, i) => Math.floor(i / rectsPerRow) === row);
-
-        transitions.push(
-          rowRects
-            .transition()
-            .delay(row * 30) // Further reduced delay for smoother appearance
-            .duration(150) // Shorter duration for snappier feel
-            .ease(d3.easeCubicInOut)
-            .style("opacity", 1)
-        );
+      // If data display isn't complete yet, wait for it
+      if (!dataDisplayComplete) {
+        console.log("Data not ready, waiting...");
+        const checkDataReady = () => {
+          if (dataDisplayComplete) {
+            console.log("Data now ready, proceeding with intro animation");
+            processIntroStep();
+          } else {
+            setTimeout(checkDataReady, 100);
+          }
+        };
+        checkDataReady();
+        return;
       }
 
-      // Remove any category labels
-      g.selectAll(".category-label").remove();
-      ///////////////////////////////////////////////////////////// ! organize by category
+      processIntroStep();
     } else if (stepId === "book-emphasis") {
       // Reset/initial view similar to intro
       svg
