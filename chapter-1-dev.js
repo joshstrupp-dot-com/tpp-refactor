@@ -9,7 +9,7 @@
     // Preload time data
     if (!window.dataCache.timeData) {
       console.log("Preloading time data");
-      d3.csv("data/sh_0415_time/sh_0415_time.csv")
+      d3.csv("./data/sh_0415_time/sh_0415_time.csv")
         .then(function (data) {
           window.dataCache.timeData = data;
           console.log("Time data preloaded:", data.length, "records");
@@ -27,7 +27,7 @@
     // Preload author data
     if (!window.dataCache.authorData) {
       console.log("Preloading author data");
-      d3.csv("data/sh_0415_author/author.csv")
+      d3.csv("./data/sh_0415_author/author.csv")
         .then(function (data) {
           window.dataCache.authorData = data;
           console.log("Author data preloaded:", data.length, "records");
@@ -260,7 +260,7 @@
     // Otherwise, fall back to loading data directly
     try {
       console.log("Loading time data directly");
-      d3.csv("data/sh_0415_time/sh_0415_time.csv")
+      d3.csv("./data/sh_0415_time/sh_0415_time.csv")
         .then((data) => {
           console.log("Time data loaded:", data.length, "records");
           displayData(data);
@@ -268,7 +268,7 @@
         .catch(() => {
           console.log("Falling back to fetch method");
           // Alternative fetch method if d3.csv fails
-          fetch("data/sh_0415_time/sh_0415_time.csv")
+          fetch("./data/sh_0415_time/sh_0415_time.csv")
             .then((response) => response.text())
             .then((csvText) => {
               const rows = csvText.split("\n");

@@ -387,7 +387,7 @@ const chapter1StepsConfig = [
 
       // Load and execute chapter-1-dev.js
       const script = document.createElement("script");
-      script.src = "chapter-1-dev.js";
+      script.src = "./chapter-1-dev.js";
       document.body.appendChild(script);
 
       // Dispatch intro state first
