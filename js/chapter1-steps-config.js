@@ -390,28 +390,29 @@ const chapter1StepsConfig = [
         .style("width", "100%")
         .style("height", "100%");
 
-      // Load and execute chapter-1-dev.js
+      // Load and execute chapter-1-dev.js, then trigger visualization steps
       const script = document.createElement("script");
       script.src = "./chapter-1-dev.js";
-      document.body.appendChild(script);
 
-      // Since data is preloaded, reduce the delay before starting animation
-      setTimeout(() => {
+      script.onload = () => {
+        // Intro step – reveal the grid instantly (no animation needed for appearance)
         document.dispatchEvent(
           new CustomEvent("visualizationUpdate", {
             detail: { step: "intro" },
           })
         );
-      }, 0); // Much shorter delay since data should be ready
 
-      // After 3 seconds, transition to intro-2 (category piles)
-      setTimeout(() => {
-        document.dispatchEvent(
-          new CustomEvent("visualizationUpdate", {
-            detail: { step: "intro-2" },
-          })
-        );
-      }, 3200);
+        // After 3.2 s sort into category piles (intro-2)
+        setTimeout(() => {
+          document.dispatchEvent(
+            new CustomEvent("visualizationUpdate", {
+              detail: { step: "intro-2" },
+            })
+          );
+        }, 3200);
+      };
+
+      document.body.appendChild(script);
     },
   },
 
