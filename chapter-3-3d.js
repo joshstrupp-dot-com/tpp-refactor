@@ -22,7 +22,7 @@
     plotContainer.style.position = "relative";
     plotContainer.style.background = "#f2efe9";
     plotContainer.style.borderRadius = "12px";
-    plotContainer.style.boxShadow = "0 4px 20px rgba(0,0,0,0.1)";
+    plotContainer.style.border = "1px solid rgba(0,0,0,0.4)";
     chapter3_3dDiv.appendChild(plotContainer);
   }
 
@@ -34,13 +34,13 @@
     // Left scroll hint
     const leftHint = document.createElement("div");
     leftHint.className = "scroll-hint";
-    leftHint.innerHTML = "↕<br>Scroll<br>here";
+    leftHint.innerHTML = "↕";
     leftHint.style.position = "absolute";
-    leftHint.style.left = "2rem";
+    leftHint.style.left = "5%";
     leftHint.style.top = "50%";
     leftHint.style.transform = "translateY(-50%)";
     leftHint.style.color = "rgba(0,0,0,0.6)";
-    leftHint.style.fontSize = "14px";
+    leftHint.style.fontSize = "18px";
     leftHint.style.fontFamily = "Andale Mono, monospace";
     leftHint.style.textAlign = "center";
     leftHint.style.lineHeight = "1.2";
@@ -52,13 +52,13 @@
     // Right scroll hint
     const rightHint = document.createElement("div");
     rightHint.className = "scroll-hint";
-    rightHint.innerHTML = "↕<br>Scroll<br>here";
+    rightHint.innerHTML = "↕";
     rightHint.style.position = "absolute";
-    rightHint.style.right = "2rem";
+    rightHint.style.right = "5%";
     rightHint.style.top = "50%";
     rightHint.style.transform = "translateY(-50%)";
     rightHint.style.color = "rgba(0,0,0,0.6)";
-    rightHint.style.fontSize = "14px";
+    rightHint.style.fontSize = "18px";
     rightHint.style.fontFamily = "Andale Mono, monospace";
     rightHint.style.textAlign = "center";
     rightHint.style.lineHeight = "1.2";
@@ -79,6 +79,88 @@
       `;
       document.head.appendChild(style);
     }
+  }
+
+  // Add interaction instructions overlay
+  function addInteractionInstructions() {
+    // Remove existing instructions
+    document
+      .querySelectorAll("#interaction-instructions")
+      .forEach((el) => el.remove());
+
+    // Create interaction instructions container
+    const instructionsDiv = document.createElement("div");
+    instructionsDiv.id = "interaction-instructions";
+    instructionsDiv.style.position = "absolute";
+    instructionsDiv.style.bottom = "20px";
+    instructionsDiv.style.left = "50%";
+    instructionsDiv.style.transform = "translateX(-50%)";
+    instructionsDiv.style.backgroundColor = "rgba(242, 239, 233, 0.9)";
+    instructionsDiv.style.border = "1px solid rgba(0,0,0,0.2)";
+    instructionsDiv.style.borderRadius = "8px";
+    instructionsDiv.style.padding = "12px 16px";
+    instructionsDiv.style.display = "flex";
+    instructionsDiv.style.gap = "20px";
+    instructionsDiv.style.alignItems = "center";
+    instructionsDiv.style.fontFamily = "Andale Mono, monospace";
+    instructionsDiv.style.fontSize = "11px";
+    instructionsDiv.style.color = "rgba(0,0,0,0.7)";
+    instructionsDiv.style.zIndex = "1000";
+    instructionsDiv.style.pointerEvents = "none";
+
+    // Create interaction items
+    const interactions = [
+      {
+        icon: "🖱️",
+        text: "LEFT CLICK + DRAG TO ORBIT",
+        asset: "assets/left-click.png",
+      },
+      {
+        icon: "🖱️",
+        text: "RIGHT CLICK + DRAG TO PAN",
+        asset: "assets/right-click.png",
+      },
+      {
+        icon: "⚬",
+        text: "SCROLL OR PINCH TO ZOOM",
+        asset: "assets/scroll.png",
+      },
+    ];
+
+    interactions.forEach((interaction) => {
+      const itemDiv = document.createElement("div");
+      itemDiv.className = "interaction-item";
+      itemDiv.style.display = "flex";
+      itemDiv.style.alignItems = "center";
+      itemDiv.style.gap = "6px";
+
+      // Try to use asset image, fallback to emoji
+      const img = document.createElement("img");
+      img.src = interaction.asset;
+      img.alt = interaction.text;
+      img.style.width = "16px";
+      img.style.height = "16px";
+      img.style.objectFit = "contain";
+
+      // Fallback to emoji if image fails to load
+      img.onerror = function () {
+        const span = document.createElement("span");
+        span.textContent = interaction.icon;
+        span.style.fontSize = "14px";
+        itemDiv.replaceChild(span, img);
+      };
+
+      const span = document.createElement("span");
+      span.textContent = interaction.text;
+      span.style.fontSize = "11px";
+      span.style.fontWeight = "500";
+
+      itemDiv.appendChild(img);
+      itemDiv.appendChild(span);
+      instructionsDiv.appendChild(itemDiv);
+    });
+
+    chapter3_3dDiv.appendChild(instructionsDiv);
   }
 
   // Store all author data
@@ -140,7 +222,7 @@
         plotContainer.style.position = "relative";
         plotContainer.style.background = "#f2efe9";
         plotContainer.style.borderRadius = "12px";
-        plotContainer.style.boxShadow = "0 4px 20px rgba(0,0,0,0.1)";
+        plotContainer.style.border = "1px solid rgba(0,0,0,0.4)";
         chapter3_3dDiv.appendChild(plotContainer);
       }
 
@@ -320,14 +402,16 @@
           "marker.line.width": [data.map((d) => (d.highlighted ? 2 : 1))],
         });
 
-        // Ensure scroll hints are still there
+        // Ensure scroll hints and interaction instructions are still there
         setTimeout(addScrollHints, 100);
+        setTimeout(addInteractionInstructions, 100);
       } else {
         // Initial plot creation or recreation after container was removed
         Plotly.newPlot("plot-container-3d", plotData, layout);
 
-        // Add scroll hints after plot is created
+        // Add scroll hints and interaction instructions after plot is created
         setTimeout(addScrollHints, 500);
+        setTimeout(addInteractionInstructions, 500);
       }
 
       // Add event listener to log camera position when the view changes

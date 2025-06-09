@@ -279,11 +279,11 @@
         .style("text-anchor", "middle")
         .text("Average Star Rating");
     } else {
-      // Desktop: X-axis for star rating
+      // Desktop: X-axis for star rating - aligned to bottom
       svg
         .append("g")
         .attr("class", "x-axis")
-        .attr("transform", `translate(0,${yCenter + 60})`)
+        .attr("transform", `translate(0,${height - 40})`)
         .call(d3.axisBottom(xScale))
         .selectAll("text")
         .attr("class", "annotation");
@@ -291,7 +291,7 @@
         .append("text")
         .attr("class", "annotation")
         .attr("x", 0)
-        .attr("y", yCenter + 100)
+        .attr("y", height + 5)
         .style("text-anchor", "start")
         .text("Average Star Rating");
     }

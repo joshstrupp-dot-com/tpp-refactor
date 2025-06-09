@@ -1,7 +1,7 @@
 const chapter3StepsConfig = [
   {
     id: "chapter-3",
-    text: "<span class='eyebrow'>Chapter Three</span>Context matters. Many authors see fire and fan flames. Others see fire and wonder what caused it.",
+    text: "<span class='eyebrow'>Chapter Three</span>Let's take a look at authors, their popularity, and the number of books they publish.",
     fullwidth: true,
     fadeIn: true,
     fadeOut: true,
@@ -13,7 +13,7 @@ const chapter3StepsConfig = [
   },
   {
     id: "celebrity-authors",
-    text: "There are some who publish an appropriate number of books. A number that indicates less ghost writing and more research.",
+    text: "There are <span style='background-color: var(--color-yellow)'>some who publish an appropriate number of books</span>. A number that indicates (to me) less ghost writing and more research.",
     fullwidth: true,
     fadeIn: true,
     render: () => {
@@ -46,7 +46,7 @@ const chapter3StepsConfig = [
 
   {
     id: "quality-authors",
-    text: "There are some who are beloved, with ratings in the top 10% of all authors.",
+    text: "There are <span style='background-color: var(--color-yellow)'>some who are beloved,</span> with ratings in the top 10% of all authors.",
     fullwidth: true,
     render: () => {
       // Ensure 2D visualization is loaded
@@ -80,7 +80,7 @@ const chapter3StepsConfig = [
 
   {
     id: "credibility-score",
-    text: `Then there are those who I've heard referred to as "drug dealers." This may seem excessive, but when you see titles like "You Are a Badass" and "Turn Your Weight Loss Vision Into Reality!", tell me you don't want a taste.`,
+    text: `Then there are <span style='background-color: var(--color-yellow)'>those who I've heard referred to as "drug dealers."</span> This may seem excessive, but when you see titles like "You Are a Badass" and "Turn Your Weight Loss Vision Into Reality!", tell me you don't want a taste.`,
     fullwidth: true,
     render: () => {
       // Ensure 2D visualization is loaded
@@ -204,13 +204,17 @@ const chapter3StepsConfig = [
           .append("div")
           .style("position", "fixed")
           .style("bottom", "2rem")
-          .style("right", "2rem")
+          .style("left", "50%")
+          .style("transform", "translateX(-50%)")
           .style("background", "transparent")
           .style("color", "black")
           .style("border", "2px solid black")
           .style("padding", "1rem 2rem")
           .style("border-radius", "30px")
           .style("cursor", "pointer")
+          .style("min-width", "200px")
+          .style("white-space", "nowrap")
+          .style("text-align", "center")
           .style("font-family", "Andale Mono, monospace")
           .style("font-size", "14px")
           .style("font-weight", "bold")

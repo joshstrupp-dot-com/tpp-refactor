@@ -18,11 +18,10 @@ const chapter1StepsConfig = [
   },
 
   {
-    id: "quick-fixes",
-    text: "You're one Amazon order from never aging again. You're 8 minutes from knowing all of Wall Street's secrets.",
+    id: "quick-fixes-1",
+    text: "You're one Amazon search from never aging again. Or a couple Google queries from knowing all of Wall Street's secrets.",
     fullwidth: true,
     fadeIn: true,
-    // fadeOut: true,
     render: () => {
       const figure = d3.select("#figure-container");
       figure.html("");
@@ -85,7 +84,7 @@ const chapter1StepsConfig = [
         .append("ul")
         .style("margin", "0 0.625rem")
         .style("padding", "0")
-        .style("animation", "scrollUp 14s forwards"); // Changed to forwards instead of infinite
+        .style("animation", "scrollUp 20s infinite"); // Extended to 42s and made infinite to cover all 3 steps
 
       // Add the scrolling words
       const words = [
@@ -129,8 +128,29 @@ const chapter1StepsConfig = [
   },
 
   {
+    id: "quick-fixes-2",
+    text: "This advice — on the other end of this search — is called self-help.",
+    fullwidth: true,
+    render: () => {
+      // Keep the existing search bar animation running - don't clear or recreate
+      // The figure container already has the search bar from the previous step
+    },
+  },
+
+  {
+    id: "quick-fixes-3",
+    text: "Like it or not, realize it or not — you're probably a consumer of self-help. Today, we will be talking about self help literature.",
+    fullwidth: true,
+    fadeOut: true,
+    render: () => {
+      // Keep the existing search bar animation running - don't clear or recreate
+      // The figure container already has the search bar from the first step
+    },
+  },
+
+  {
     id: "blame-game",
-    text: "Self-help literature is the fastest growing nonfiction genre since 2013. ",
+    text: "I've read some best-sellers in the category believing, like many, that I'll emerge from the back cover a new man.",
     fullwidth: true,
     render: () => {
       // Clear existing content and remove any lingering assets from other steps
@@ -160,6 +180,26 @@ const chapter1StepsConfig = [
           })
         );
       }, 500);
+    },
+  },
+
+  {
+    id: "blame-game-1a",
+    text: "But here I am — mind still racing, no more enlightened than any of you. I'm not alone.",
+    fullwidth: true,
+    render: () => {
+      // Keep the existing grid visualization running - don't clear or recreate
+      // The visualization was already created in the previous blame-game step
+    },
+  },
+
+  {
+    id: "blame-game-1b",
+    text: "Self-help literature is the fastest growing nonfiction genre since 2013.",
+    fullwidth: true,
+    render: () => {
+      // Keep the existing grid visualization running - don't clear or recreate
+      // The visualization was already created in the first blame-game step
     },
   },
 
@@ -349,10 +389,18 @@ const chapter1StepsConfig = [
     },
   },
   {
-    id: "fastest-growing",
-    text: `I used machine learning to classify 20,000 books into 10 categories that designate what problem they aim to address, then organized them into two umbrella categories.<br><br>Books that claim the problem comes from:<br><br>THE WORLD — think society, family, metaphysics.<br><br>YOU — think self-esteem, willpower, internalized doubt`,
+    id: "systemic-problems-2",
+    text: "It detracts from my point: our anxieties are often the result of historical events outside of our control — and some authors point the blame at you for profit.",
     fullwidth: true,
-    fadeOut: true,
+    render: () => {
+      // Keep the existing background image animation running - don't clear or recreate
+      // The background images were already created in the previous systemic-problems step
+    },
+  },
+  {
+    id: "fastest-growing-1",
+    text: "I used machine learning to classify 20,000 books, each containing ratings, popularity, summaries, lots and lots of data.",
+    fullwidth: true,
     render: () => {
       // Fade out and remove all background images
       const bgContainer = d3.select("#background-images");
@@ -401,24 +449,41 @@ const chapter1StepsConfig = [
             detail: { step: "intro" },
           })
         );
-
-        // After 3.2 s sort into category piles (intro-2)
-        setTimeout(() => {
-          document.dispatchEvent(
-            new CustomEvent("visualizationUpdate", {
-              detail: { step: "intro-2" },
-            })
-          );
-        }, 3200);
       };
 
       document.body.appendChild(script);
     },
   },
+  {
+    id: "fastest-growing-2",
+    text: "I then used that data to sort them into 10 categories that designate what problem they aim to address.",
+    fullwidth: true,
+    render: () => {
+      // Keep the existing visualization running - don't clear or recreate
+      // Trigger the sorting animation after user has read the text
+      setTimeout(() => {
+        document.dispatchEvent(
+          new CustomEvent("visualizationUpdate", {
+            detail: { step: "intro-2" },
+          })
+        );
+      }, 500);
+    },
+  },
+  {
+    id: "fastest-growing-3",
+    text: "I then organized them into two umbrella categories. Books that claim the problem comes from <span style='color: teal'>The World</span> — think society, family, metaphysics — and <span style='color: orange'>You</span> — think self-esteem, willpower, internalized doubt.",
+    fullwidth: true,
+    fadeOut: true,
+    render: () => {
+      // Keep the existing visualization running - don't clear or recreate
+      // The sorting animation was already triggered in the previous fastest-growing-2 step
+    },
+  },
 
   {
     id: "chapter-1-end",
-    text: `<span class="eyebrow">Chapter One</span><span style="opacity: 0.4">Placeholder ending text for Chapter 1.</span> Coming soon.`,
+    text: `<span class="eyebrow">Chapter One</span><span style="opacity: 0.4">Next, we'll see when self-help books </span>shifted from the world's problems to personal problems.`,
     fullwidth: true,
     customClass: "header",
     render: () => {

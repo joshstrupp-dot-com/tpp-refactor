@@ -12,7 +12,7 @@ const chapter2StepsConfig = [
 
   {
     id: "samuel-smiles",
-    text: "The very first Self Help book was a response to poor working conditions.",
+    text: "The work by Samuel Smiles was largely a response to poor working conditions.",
     fullwidth: true,
     fadeIn: true,
     render: () => {
@@ -72,8 +72,22 @@ const chapter2StepsConfig = [
   },
 
   {
-    id: "all-years",
-    text: `The gap finally closes as we enter the 21st century. Self-help pivots toward coping and finding resilience within yourself. Many authors push "personal hustle" as a response to economic insecurity, or "leaning in" first, addressing sexism second.`,
+    id: "world-vs-you",
+    text: `The gap finally closes as we enter the 21st century. <span style='color: var(--color-teal)'>The World</span> vs. <span style='color: var(--color-orange)'>You</span> became <span style='color: var(--color-orange)'>You</span> vs. <span style='color: var(--color-teal)'>The World</span>.`,
+    fullwidth: true,
+    render: () => {
+      // Just update the existing visualization
+      document.dispatchEvent(
+        new CustomEvent("visualizationUpdate", {
+          detail: { step: "all-years" },
+        })
+      );
+    },
+  },
+
+  {
+    id: "personal-resilience",
+    text: `Self-help pivots toward finding resilience within yourself, with authors pushing for "personal hustle" as a response to economic insecurity, or "leaning in" first, addressing sexism second.`,
     fullwidth: true,
     fadeOut: true,
     render: () => {
@@ -88,7 +102,7 @@ const chapter2StepsConfig = [
 
   {
     id: "chapter-2-end",
-    text: `<span class="eyebrow">Chapter Two</span><span style="opacity: 0.4">Placeholder ending text for Chapter 2.</span> Coming soon.`,
+    text: `<span class="eyebrow">Chapter Two</span><span style="opacity: 0.4">History impacts feelings of helplessness.</span> But who’s preying on those feelings?`,
     fullwidth: true,
     customClass: "header",
     render: () => {
