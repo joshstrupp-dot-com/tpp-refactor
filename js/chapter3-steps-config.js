@@ -189,19 +189,56 @@ const chapter3StepsConfig = [
   },
 
   {
-    id: "conclusion",
-    text: "<span class='eyebrow'>Chapter Three</span>The problem with fixing yourself.",
+    id: "conclusion-header",
+    text: "<span class='eyebrow'>Chapter Three</span>The problem with fixing yourself — is that you can't. And that's ok.",
     fullwidth: true,
     customClass: "header",
     render: () => {
       const figure = d3.select("#figure-container");
       figure.html("");
+    },
+  },
+  {
+    id: "life-is-hard",
+    text: "Again, life is hard. That doesn't mean you made your life hard. And it doesn't mean you're solely responsible for fixing everything.",
+    fullwidth: true,
+    render: () => {
+      const figure = d3.select("#figure-container");
+      figure.html("");
+    },
+  },
+  {
+    id: "understand-forces",
+    text: "Understand the uncontrollable forces that make life hard, understand that some authors should be read with caution, and strive to understand yourself more, and fix yourself less.",
+    fullwidth: true,
+    render: () => {
+      const figure = d3.select("#figure-container");
+      figure.html("");
+
+      // Add extra spacing to ensure the next step can be triggered
+      const section = d3.select("#scrolly");
+      if (section && section.node()) {
+        section.style("padding-bottom", "60vh");
+      }
+    },
+  },
+  {
+    id: "thank-you",
+    text: "Thank you for reading. For those that want roughly 4,577 more words on the subject, check out my <a href='https://github.com/joshstrupp-dot-com/the-problem-presentation/blob/main/Strupp_Thesis_Final.pdf' target='_blank'>full thesis</a>. For further information on the project and to see more of my work, check out <a href='https://www.joshstrupp.com/data-visualization/the-problem-with-fixing-yourself' target='_blank'>my portfolio</a>.",
+    fullwidth: true,
+    render: () => {
+      const figure = d3.select("#figure-container");
+      figure.html("");
+
+      // Remove any existing back buttons to prevent duplicates
+      d3.selectAll(".back-to-beginning-btn").remove();
 
       // Add a "Back to Beginning" button at the end
       setTimeout(() => {
         const button = d3
           .select("body")
           .append("div")
+          .attr("class", "back-to-beginning-btn")
           .style("position", "fixed")
           .style("bottom", "2rem")
           .style("left", "50%")
@@ -233,13 +270,13 @@ const chapter3StepsConfig = [
             d3.select(this)
               .style("background", "black")
               .style("color", "white")
-              .style("transform", "scale(1.05)");
+              .style("transform", "translateX(-50%) scale(1.05)");
           })
           .on("mouseout", function () {
             d3.select(this)
               .style("background", "transparent")
               .style("color", "black")
-              .style("transform", "scale(1)");
+              .style("transform", "translateX(-50%) scale(1)");
           });
 
         // Fade in the button
