@@ -88,25 +88,39 @@
       .querySelectorAll("#interaction-instructions")
       .forEach((el) => el.remove());
 
+    // Check if mobile
+    const isMobile = window.innerWidth <= 768;
+
     // Create interaction instructions container
     const instructionsDiv = document.createElement("div");
     instructionsDiv.id = "interaction-instructions";
     instructionsDiv.style.position = "absolute";
-    instructionsDiv.style.bottom = "20px";
+    instructionsDiv.style.bottom = isMobile ? "20px" : "50px";
     instructionsDiv.style.left = "50%";
     instructionsDiv.style.transform = "translateX(-50%)";
     instructionsDiv.style.backgroundColor = "rgba(242, 239, 233, 0.9)";
     instructionsDiv.style.border = "1px solid rgba(0,0,0,0.2)";
     instructionsDiv.style.borderRadius = "8px";
-    instructionsDiv.style.padding = "12px 16px";
+    instructionsDiv.style.padding = isMobile ? "8px 12px" : "12px 16px";
     instructionsDiv.style.display = "flex";
-    instructionsDiv.style.gap = "20px";
+    instructionsDiv.style.flexDirection = "column";
+    instructionsDiv.style.gap = isMobile ? "8px" : "12px";
     instructionsDiv.style.alignItems = "center";
     instructionsDiv.style.fontFamily = "Andale Mono, monospace";
-    instructionsDiv.style.fontSize = "11px";
+    instructionsDiv.style.fontSize = isMobile ? "9px" : "11px";
     instructionsDiv.style.color = "rgba(0,0,0,0.7)";
     instructionsDiv.style.zIndex = "1000";
     instructionsDiv.style.pointerEvents = "none";
+    instructionsDiv.style.width = isMobile ? "90%" : "auto";
+    instructionsDiv.style.maxWidth = isMobile ? "90%" : "600px";
+
+    // Create main interaction items container
+    const interactionItemsDiv = document.createElement("div");
+    interactionItemsDiv.style.display = "flex";
+    interactionItemsDiv.style.gap = isMobile ? "12px" : "20px";
+    interactionItemsDiv.style.alignItems = "center";
+    interactionItemsDiv.style.flexWrap = isMobile ? "wrap" : "nowrap";
+    interactionItemsDiv.style.justifyContent = "center";
 
     // Create interaction items
     const interactions = [
@@ -132,33 +146,45 @@
       itemDiv.className = "interaction-item";
       itemDiv.style.display = "flex";
       itemDiv.style.alignItems = "center";
-      itemDiv.style.gap = "6px";
+      itemDiv.style.gap = isMobile ? "4px" : "6px";
 
       // Try to use asset image, fallback to emoji
       const img = document.createElement("img");
       img.src = interaction.asset;
       img.alt = interaction.text;
-      img.style.width = "16px";
-      img.style.height = "16px";
+      img.style.width = isMobile ? "12px" : "16px";
+      img.style.height = isMobile ? "12px" : "16px";
       img.style.objectFit = "contain";
 
       // Fallback to emoji if image fails to load
       img.onerror = function () {
         const span = document.createElement("span");
         span.textContent = interaction.icon;
-        span.style.fontSize = "14px";
+        span.style.fontSize = isMobile ? "10px" : "14px";
         itemDiv.replaceChild(span, img);
       };
 
       const span = document.createElement("span");
       span.textContent = interaction.text;
-      span.style.fontSize = "11px";
+      span.style.fontSize = isMobile ? "9px" : "11px";
       span.style.fontWeight = "500";
 
       itemDiv.appendChild(img);
       itemDiv.appendChild(span);
-      instructionsDiv.appendChild(itemDiv);
+      interactionItemsDiv.appendChild(itemDiv);
     });
+
+    // Add scroll instruction text
+    const scrollInstruction = document.createElement("div");
+    scrollInstruction.style.fontSize = isMobile ? "8px" : "10px";
+    scrollInstruction.style.color = "rgba(0,0,0,0.6)";
+    scrollInstruction.style.fontStyle = "italic";
+    scrollInstruction.style.textAlign = "center";
+    scrollInstruction.style.marginTop = isMobile ? "4px" : "6px";
+    scrollInstruction.textContent = "scroll outside of chart bounds to advance";
+
+    instructionsDiv.appendChild(interactionItemsDiv);
+    instructionsDiv.appendChild(scrollInstruction);
 
     chapter3_3dDiv.appendChild(instructionsDiv);
   }
