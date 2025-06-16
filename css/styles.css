@@ -342,7 +342,7 @@ figure p {
   background-blend-mode: overlay, normal;
   backdrop-filter: blur(40px);
   color: #333;
-  opacity: 0.9;
+  opacity: 0.95;
 }
 
 .step:last-child {

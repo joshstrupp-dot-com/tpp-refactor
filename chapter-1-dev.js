@@ -202,12 +202,18 @@
       g.attr("transform", event.transform);
     })
     .filter((event) => {
-      // Disable mouse wheel/scroll zooming
+      // On mobile devices, disable all zoom/pan behavior
+      if (isMobile) {
+        return false;
+      }
+      // On desktop, disable mouse wheel/scroll zooming but allow click+drag
       return !event.type.includes("wheel");
     });
 
-  // Apply zoom behavior to svg
-  svg.call(zoom);
+  // Apply zoom behavior to svg only on non-mobile devices
+  if (!isMobile) {
+    svg.call(zoom);
+  }
 
   // Variable to track if we've zoomed in on a specific book
   let zoomedIn = false;
